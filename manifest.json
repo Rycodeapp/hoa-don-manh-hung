@@ -1,0 +1,24 @@
+{
+  "name": "Thế giới Cửa Mạnh Hùng - Hóa Đơn Bán Hàng",
+  "short_name": "Hóa Đơn Cửa",
+  "description": "Phần mềm tạo Hóa đơn bán hàng Cửa Cuốn - Cửa Kéo - Cửa Đài Loan",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thế giới Cửa Mạnh Hùng - Hóa Đơn Bán Hàng</title>
+
+    <!-- PWA MANIFEST & META TAGS -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hóa Đơn Cửa">
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-28">
+
+    <!-- HEADER ỨNG DỤNG -->
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-md border-b border-blue-700/50">
+        <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-amber-400 text-blue-950 flex items-center justify-center font-black text-2xl shadow-inner">
+                    🚪
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+                        Thế Giới Cửa Mạnh Hùng
+                    </h1>
+                    <p class="text-blue-200 text-sm md:text-base">
+                        Hóa Đơn Cửa Cuốn - Cửa Kéo - Cửa Đài Loan (SĐT: 0976.088.080 - 0916.557.888)
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button type="button" id="btnInstallPwa" class="hidden px-4 py-2 bg-amber-400 hover:bg-amber-300 text-blue-950 font-bold rounded-xl shadow text-sm items-center gap-1.5 transition-all">
+                    📲 Cài đặt App
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl mx-auto px-3 sm:px-4 pt-6">
+        
+        <!-- COMPONENT 1: FORM KHÁCH HÀNG & ĐƠN VỊ -->
+        <section id="customerFormContainer"></section>
+
+        <!-- COMPONENT 2: BẢNG SẢN PHẨM & TÍNH TIỀN REALTIME -->
+        <section id="productTableContainer"></section>
+
+    </main>
+
+    <!-- COMPONENT 3: THANH CÔNG CỤ THAO TÁC (TOOLBAR DƯỚI ĐÁY) -->
+    <div id="toolbarContainer"></div>
+
+    <!-- COMPONENT 4: MODAL XEM TRƯỚC HÓA ĐƠN PAPER PREVIEW -->
+    <div id="previewModalContainer" class="hidden"></div>
+
+    <!-- SCRIPTS CORE MODULES -->
+    <script src="assets/js/vietnameseMoney.js"></script>
+    <script src="assets/js/formatter.js"></script>
+    <script src="assets/js/calculator.js"></script>
+    <script src="assets/js/validation.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/state.js"></script>
+
+    <!-- SCRIPTS COMPONENTS -->
+    <script src="assets/components/customerForm.js"></script>
+    <script src="assets/components/productRow.js"></script>
+    <script src="assets/components/productTable.js"></script>
+    <script src="assets/components/toolbar.js"></script>
+    <script src="assets/components/preview.js"></script>
+    <script src="assets/js/printer.js"></script>
+
+    <!-- ENTRY POINT & REGISTER SERVICE WORKER -->
+    <script src="assets/js/app.js"></script>
+    <script>
+        // Đăng ký Service Worker cho PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('PWA ServiceWorker ready!', reg))
+                    .catch(err => console.log('PWA ServiceWorker error:', err));
+            });
+        }
+
+        // Xử lý nút Cài Đặt PWA App
+        let deferredPrompt;
+        const btnInstallPwa = document.getElementById('btnInstallPwa');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (btnInstallPwa) {
+                btnInstallPwa.classList.remove('hidden');
+                btnInstallPwa.classList.add('flex');
+            }
+        });
+
+        if (btnInstallPwa) {
+            btnInstallPwa.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        btnInstallPwa.classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

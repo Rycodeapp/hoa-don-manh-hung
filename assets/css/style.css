@@ -1,0 +1,106 @@
+/* Style chuẩn hóa font chữ Times New Roman & Arial */
+
+:root {
+    --font-primary: 'Times New Roman', Times, Arial, serif;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-tap-highlight-color: transparent;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Chuẩn hóa font trên tất cả các ô input, button, select, text */
+input, select, textarea, button {
+    font-family: var(--font-primary);
+    touch-action: manipulation;
+}
+
+/* Đảm bảo tên sản phẩm có thể xuống dòng mượt tới 3 dòng mà không làm vỡ ô */
+.invoice-product-name {
+    word-break: break-word;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+/* QUY TẮC IN HÓA ĐƠN VÀ PHÂN TRANG THÔNG MINH @MEDIA PRINT */
+@media print {
+    /* Ẩn tất cả các phần tử ứng dụng ngoại trừ khung Hóa Đơn giấy */
+    body > *:not(#previewModalContainer) {
+        display: none !important;
+    }
+
+    #previewModalContainer {
+        position: static !important;
+        background: transparent !important;
+        display: block !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #previewModalContainer > div {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+    }
+
+    /* Khung giấy hóa đơn khi in */
+    #invoicePaperSheet {
+        font-family: 'Times New Roman', Times, serif !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: #000 !important;
+        width: 100% !important;
+    }
+
+    /* Đảm bảo khối Tổng tiền + Số tiền bằng chữ + Chữ ký LUÔN ĐI CÙNG NHAU không bị ngắt trang */
+    .invoice-footer-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .invoice-paper-row {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Tự động co giãn mật độ khi hóa đơn có từ 9 sản phẩm trở lên */
+    .dense-sheet {
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+    }
+
+    .dense-sheet th, 
+    .dense-sheet td {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    .dense-sheet .signature-box {
+        height: 48px !important;
+    }
+
+    /* Bảng hóa đơn */
+    table {
+        border-color: #1e3a8a !important;
+    }
+
+    /* Thiết lập trang in A4 */
+    @page {
+        size: A4 portrait;
+        margin: 6mm 8mm;
+    }
+}
