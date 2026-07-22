@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hoa-don-manh-hung-v1';
+const CACHE_NAME = 'hoa-don-manh-hung-v2';
 const ASSETS_TO_CACHE = [
     './index.html',
     './manifest.json',
@@ -18,44 +18,53 @@ const ASSETS_TO_CACHE = [
     './assets/js/app.js'
 ];
 
-// Cài đặt Service Worker và lưu cache
+// Cài đặt Service Worker và lập tức kích hoạt phiên bản mới
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('[Service Worker] Caching static assets');
+            console.log('[Service Worker] Caching updated static assets v2');
             return cache.addAll(ASSETS_TO_CACHE);
         })
     );
-    self.skipWaiting();
 });
 
-// Kích hoạt và dọn dẹp cache cũ
+// Kích hoạt và dọn dẹp TOÀN BỘ cache cũ
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.map((key) => {
                     if (key !== CACHE_NAME) {
+                        console.log('[Service Worker] Deleting old cache:', key);
                         return caches.delete(key);
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
-    self.clients.claim();
 });
 
-// Lấy dữ liệu từ Cache khi Offline
+// Lấy dữ liệu từ Network trước, nếu mất mạng mới lấy Cache
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request).catch(() => {
-                // Fallback nếu không có mạng
-                return caches.match('./index.html');
-            });
-        })
+        fetch(event.request)
+            .then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseClone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return networkResponse;
+            })
+            .catch(() => {
+                return caches.match(event.request).then((cachedResponse) => {
+                    if (cachedResponse) {
+                        return cachedResponse;
+                    }
+                    return caches.match('./index.html');
+                });
+            })
     );
 });

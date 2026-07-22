@@ -6,12 +6,12 @@
     <title>Thế giới Cửa Mạnh Hùng - Hóa Đơn Bán Hàng</title>
 
     <!-- PWA MANIFEST & META TAGS -->
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./manifest.json?v=2">
     <meta name="theme-color" content="#1e3a8a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hóa Đơn Cửa">
-    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=2">
 
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +33,7 @@
     </script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-28">
 
@@ -80,29 +80,32 @@
     <div id="previewModalContainer" class="hidden"></div>
 
     <!-- SCRIPTS CORE MODULES -->
-    <script src="assets/js/vietnameseMoney.js"></script>
-    <script src="assets/js/formatter.js"></script>
-    <script src="assets/js/calculator.js"></script>
-    <script src="assets/js/validation.js"></script>
-    <script src="assets/js/storage.js"></script>
-    <script src="assets/js/state.js"></script>
+    <script src="assets/js/vietnameseMoney.js?v=2"></script>
+    <script src="assets/js/formatter.js?v=2"></script>
+    <script src="assets/js/calculator.js?v=2"></script>
+    <script src="assets/js/validation.js?v=2"></script>
+    <script src="assets/js/storage.js?v=2"></script>
+    <script src="assets/js/state.js?v=2"></script>
 
     <!-- SCRIPTS COMPONENTS -->
-    <script src="assets/components/customerForm.js"></script>
-    <script src="assets/components/productRow.js"></script>
-    <script src="assets/components/productTable.js"></script>
-    <script src="assets/components/toolbar.js"></script>
-    <script src="assets/components/preview.js"></script>
-    <script src="assets/js/printer.js"></script>
+    <script src="assets/components/customerForm.js?v=2"></script>
+    <script src="assets/components/productRow.js?v=2"></script>
+    <script src="assets/components/productTable.js?v=2"></script>
+    <script src="assets/components/toolbar.js?v=2"></script>
+    <script src="assets/components/preview.js?v=2"></script>
+    <script src="assets/js/printer.js?v=2"></script>
 
     <!-- ENTRY POINT & REGISTER SERVICE WORKER -->
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=2"></script>
     <script>
-        // Đăng ký Service Worker cho PWA
+        // Đăng ký Service Worker v2 tự động cập nhật ngay khi mở trang
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('PWA ServiceWorker ready!', reg))
+                navigator.serviceWorker.register('./service-worker.js?v=2')
+                    .then(reg => {
+                        reg.update();
+                        console.log('PWA ServiceWorker v2 updated!', reg);
+                    })
                     .catch(err => console.log('PWA ServiceWorker error:', err));
             });
         }
