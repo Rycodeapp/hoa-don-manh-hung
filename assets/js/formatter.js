@@ -30,9 +30,7 @@ const formatter = (function () {
     function parseInputNumber(str) {
         if (typeof str === 'number') return isNaN(str) ? 0 : str;
         if (!str) return 0;
-        // Chuyển dấu phẩy thành dấu chấm nếu nhập thập phân tiếng Việt, xóa bớt dấu chấm phân cách hàng nghìn
         let cleaned = str.toString().trim();
-        // Nếu có cả . và , thì . là hàng nghìn, , là thập phân
         if (cleaned.includes('.') && cleaned.includes(',')) {
             cleaned = cleaned.replace(/\./g, '').replace(',', '.');
         } else if (cleaned.includes(',')) {
@@ -42,10 +40,22 @@ const formatter = (function () {
         return isNaN(val) ? 0 : val;
     }
 
+    /**
+     * Xóa dấu tiếng Việt và ký tự đặc biệt để tạo tên file an toàn cho iPhone/Android
+     */
+    function sanitizeFileName(str) {
+        if (!str) return '';
+        let result = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        result = result.replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        result = result.replace(/[/\\?%*:|"<>]/g, '');
+        return result.trim();
+    }
+
     return {
         formatCurrency: formatCurrency,
         formatDecimal: formatDecimal,
-        parseInputNumber: parseInputNumber
+        parseInputNumber: parseInputNumber,
+        sanitizeFileName: sanitizeFileName
     };
 })();
 

@@ -7,7 +7,7 @@ const stateManager = (function () {
         const now = new Date();
         const dd = String(now.getDate()).padStart(2, '0');
         const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const rand = Math.floor(100 + Math.random() * 900); // 3 chữ số ngẫu nhiên
+        const rand = Math.floor(100 + Math.random() * 900);
         return `HD${dd}${mm}-${rand}`;
     }
 
@@ -29,8 +29,9 @@ const stateManager = (function () {
                 unit: 'm²',
                 width: 3.5,
                 height: 3.2,
-                area: 11.2,
-                quantity: 1,
+                quantity: 1, // Số bộ
+                areaPerSet: 11.2,
+                area: 11.2, // Tổng m²
                 price: 1350000,
                 total: 15120000,
                 note: 'Đã bao gồm chi phí lắp đặt'
@@ -61,14 +62,18 @@ const stateManager = (function () {
             state.items.forEach(item => {
                 const w = parseFloat(item.width) || 0;
                 const h = parseFloat(item.height) || 0;
+                const setQty = parseFloat(item.quantity) || 1;
                 const price = parseFloat(item.price) || 0;
 
                 if (w > 0 && h > 0) {
-                    item.area = Math.round(w * h * 100) / 100;
-                    item.total = Math.round(item.area * price);
+                    const calcRes = typeof calculator !== 'undefined' ? calculator.calculateArea(w, h, setQty) : { areaPerSet: Math.round(w*h*100)/100, totalArea: Math.round(w*h*setQty*100)/100 };
+                    item.areaPerSet = calcRes.areaPerSet;
+                    item.area = calcRes.totalArea; // Tổng m² = Ngang x Cao x Số bộ
+                    item.total = Math.round(calcRes.totalArea * price);
                 } else {
-                    const qty = parseFloat(item.quantity) || 1;
-                    item.total = Math.round(qty * price);
+                    item.areaPerSet = 0;
+                    item.area = 0;
+                    item.total = Math.round(setQty * price);
                 }
             });
         }
@@ -88,6 +93,12 @@ const stateManager = (function () {
         if (typeof storage !== 'undefined') {
             storage.saveInvoiceState(state);
         }
+
+        // Tự động cập nhật document.title theo mã HD và Tên khách hàng khi nhập liệu
+        if (typeof printer !== 'undefined') {
+            printer.updatePdfTitle();
+        }
+
         if (!silent) {
             notify();
         }
@@ -103,8 +114,9 @@ const stateManager = (function () {
             unit: 'm²',
             width: '',
             height: '',
+            quantity: 1, // Mặc định 1 bộ
+            areaPerSet: 0,
             area: 0,
-            quantity: 1,
             price: 0,
             total: 0,
             note: ''

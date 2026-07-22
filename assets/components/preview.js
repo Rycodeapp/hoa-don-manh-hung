@@ -1,6 +1,6 @@
 /**
  * Component Preview & In Hóa đơn chuẩn 100% theo mẫu hóa đơn thực tế
- * Tích hợp Phân trang thông minh và Tự động đặt tên file PDF trên Mobile & Desktop
+ * Tích hợp Phân trang thông minh, hỗ trợ hiển thị Số bộ cửa và Tự động đặt tên file PDF trên Mobile & Desktop
  */
 
 const preview = (function () {
@@ -66,9 +66,15 @@ const preview = (function () {
         for (let i = 0; i < targetMinRows; i++) {
             const item = items[i];
             if (item) {
-                let qtyDisplay = item.quantity || 1;
+                const setQty = parseFloat(item.quantity) || 1;
+                let qtyDisplay = setQty;
+
                 if (item.width && item.height) {
-                    qtyDisplay = `${item.width} x ${item.height} = ${item.area} m²`;
+                    if (setQty > 1) {
+                        qtyDisplay = `${setQty} bộ x (${item.width}m x ${item.height}m) = ${item.area} m²`;
+                    } else {
+                        qtyDisplay = `${item.width}m x ${item.height}m = ${item.area} m²`;
+                    }
                 } else if (item.area) {
                     qtyDisplay = `${item.area} m²`;
                 }

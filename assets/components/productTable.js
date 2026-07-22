@@ -14,7 +14,6 @@ const productTable = (function () {
 
         stateManager.subscribe((newState) => {
             const currentItems = newState.items || [];
-            // Chỉ re-render toàn bộ khi số lượng món hàng thay đổi hoặc chưa khởi tạo
             if (currentItems.length !== lastItemsCount) {
                 render(container);
                 bindEvents(container);
@@ -57,7 +56,7 @@ const productTable = (function () {
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-slate-800">Danh sách Cửa & Sản phẩm</h2>
-                            <p class="text-slate-500 text-sm">Nhập số đo (Ngang x Cao) hoặc số lượng và đơn giá</p>
+                            <p class="text-slate-500 text-sm">Nhập số đo (Ngang x Cao), số bộ cửa và đơn giá</p>
                         </div>
                     </div>
                     
@@ -101,7 +100,6 @@ const productTable = (function () {
     }
 
     function bindEvents(container) {
-        // Nút thêm sản phẩm
         const btnAdd = container.querySelector('#btnAddItem');
         if (btnAdd) {
             btnAdd.addEventListener('click', () => {
@@ -115,12 +113,10 @@ const productTable = (function () {
             });
         }
 
-        // Sự kiện từng dòng sản phẩm
         const rowEls = container.querySelectorAll('.product-row');
         rowEls.forEach(rowEl => {
             const id = rowEl.getAttribute('data-id');
 
-            // Nút xóa dòng
             const btnRemove = rowEl.querySelector('.btn-remove-row');
             if (btnRemove) {
                 btnRemove.addEventListener('click', () => {
@@ -132,6 +128,7 @@ const productTable = (function () {
             const unitSelect = rowEl.querySelector('.item-unit');
             const widthInp = rowEl.querySelector('.item-width');
             const heightInp = rowEl.querySelector('.item-height');
+            const qtyInp = rowEl.querySelector('.item-quantity');
             const qtyAreaInp = rowEl.querySelector('.item-qty-area');
             const priceInp = rowEl.querySelector('.item-price');
             const noteInp = rowEl.querySelector('.item-note');
@@ -140,17 +137,20 @@ const productTable = (function () {
             const handleItemInput = () => {
                 const w = parseFloat(widthInp.value) || 0;
                 const h = parseFloat(heightInp.value) || 0;
+                const setQty = parseFloat(qtyInp.value) || 1;
                 const price = parseFloat(priceInp.value) || 0;
-                let area = 0;
-                let qty = parseFloat(qtyAreaInp.value) || 1;
+                let areaPerSet = 0;
+                let totalArea = 0;
                 let total = 0;
 
                 if (w > 0 && h > 0) {
-                    area = Math.round(w * h * 100) / 100;
-                    qtyAreaInp.value = area;
-                    total = Math.round(area * price);
+                    areaPerSet = Math.round(w * h * 100) / 100;
+                    totalArea = Math.round(areaPerSet * setQty * 100) / 100;
+                    qtyAreaInp.value = totalArea;
+                    total = Math.round(totalArea * price);
                 } else {
-                    total = Math.round(qty * price);
+                    totalArea = parseFloat(qtyAreaInp.value) || setQty;
+                    total = Math.round(setQty * price);
                 }
 
                 if (totalDisplayDiv) {
@@ -162,8 +162,9 @@ const productTable = (function () {
                     unit: unitSelect.value,
                     width: widthInp.value,
                     height: heightInp.value,
-                    area: area,
-                    quantity: qty,
+                    quantity: setQty,
+                    areaPerSet: areaPerSet,
+                    area: totalArea,
                     price: price,
                     total: total,
                     note: noteInp.value
@@ -172,7 +173,7 @@ const productTable = (function () {
                 updateTotalsOnly(container);
             };
 
-            [nameInp, unitSelect, widthInp, heightInp, qtyAreaInp, priceInp, noteInp].forEach(inputEl => {
+            [nameInp, unitSelect, widthInp, heightInp, qtyInp, qtyAreaInp, priceInp, noteInp].forEach(inputEl => {
                 if (inputEl) {
                     inputEl.addEventListener('input', handleItemInput);
                 }

@@ -1,24 +1,39 @@
 /**
- * Module Tính toán Diện tích, Thành tiền & Tổng cộng
+ * Module Tính toán Diện tích, Thành tiền & Tổng cộng (Hỗ trợ nhập số bộ cửa)
  */
 
 const calculator = (function () {
     /**
-     * Tính diện tích từ Ngang và Cao (m x m = m²)
+     * Tính diện tích 1 bộ và tổng diện tích khi có số bộ cửa
+     * Ngang x Cao = Diện tích 1 bộ (m²)
+     * Diện tích 1 bộ x Số bộ = Tổng m²
      */
-    function calculateArea(width, height) {
+    function calculateArea(width, height, setQty = 1) {
         const w = parseFloat(width) || 0;
         const h = parseFloat(height) || 0;
-        if (w <= 0 || h <= 0) return 0;
-        return Math.round(w * h * 100) / 100; // Làm tròn 2 chữ số thập phân
+        const qty = parseFloat(setQty) || 1;
+
+        if (w <= 0 || h <= 0) {
+            return {
+                areaPerSet: 0,
+                totalArea: 0
+            };
+        }
+
+        const areaPerSet = Math.round(w * h * 100) / 100;
+        const totalArea = Math.round(areaPerSet * qty * 100) / 100;
+
+        return {
+            areaPerSet: areaPerSet,
+            totalArea: totalArea
+        };
     }
 
     /**
      * Tính thành tiền của một dòng sản phẩm
-     * Nếu tính theo diện tích m² hoặc số lượng (cái, bộ, kg...)
      */
-    function calculateItemTotal(qtyOrArea, price) {
-        const q = parseFloat(qtyOrArea) || 0;
+    function calculateItemTotal(qtyOrTotalArea, price) {
+        const q = parseFloat(qtyOrTotalArea) || 0;
         const p = parseFloat(price) || 0;
         if (q <= 0 || p <= 0) return 0;
         return Math.round(q * p);

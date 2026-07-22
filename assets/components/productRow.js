@@ -1,5 +1,5 @@
 /**
- * Component Dòng sản phẩm (Product Row) trong bảng nhập liệu
+ * Component Dòng sản phẩm (Product Row) hỗ trợ nhập Kích thước & Số bộ cửa
  */
 
 const productRow = (function () {
@@ -18,7 +18,11 @@ const productRow = (function () {
     ];
 
     function renderRow(item, index) {
-        const area = item.width && item.height ? (parseFloat(item.width) * parseFloat(item.height)).toFixed(2) : (item.area || 0);
+        const w = parseFloat(item.width) || 0;
+        const h = parseFloat(item.height) || 0;
+        const setQty = parseFloat(item.quantity) || 1;
+        const totalArea = w > 0 && h > 0 ? (w * h * setQty).toFixed(2) : (item.area || 0);
+
         const formattedTotal = typeof formatter !== 'undefined' ? formatter.formatCurrency(item.total) : item.total + ' đ';
 
         return `
@@ -35,7 +39,7 @@ const productRow = (function () {
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 text-base">
-                    <!-- Tên quy cách sản phẩm (Cột rộng nhất) -->
+                    <!-- Tên quy cách sản phẩm -->
                     <div class="lg:col-span-4">
                         <label class="block text-slate-700 font-semibold text-sm mb-1">Quy cách / Tên sản phẩm <span class="text-red-500">*</span></label>
                         <input type="text" list="productList_${item.id}" class="item-name w-full px-3 py-2.5 text-base border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none bg-white font-medium" 
@@ -71,22 +75,29 @@ const productRow = (function () {
                             placeholder="0.00" value="${item.height !== undefined && item.height !== '' ? item.height : ''}">
                     </div>
 
-                    <!-- Diện tích / SL -->
+                    <!-- Số bộ cửa / Số lượng -->
                     <div class="lg:col-span-2">
-                        <label class="block text-slate-700 font-semibold text-sm mb-1">Diện tích / SL</label>
+                        <label class="block text-slate-700 font-semibold text-sm mb-1">Số bộ / SL</label>
+                        <input type="number" min="1" step="1" class="item-quantity w-full px-3 py-2.5 text-base border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none bg-amber-50 font-bold text-amber-900 border-amber-300" 
+                            placeholder="1" value="${item.quantity || 1}">
+                    </div>
+
+                    <!-- Tổng m² tính toán -->
+                    <div class="lg:col-span-3">
+                        <label class="block text-slate-700 font-semibold text-sm mb-1">Tổng m² diện tích</label>
                         <input type="number" step="0.01" min="0" class="item-qty-area w-full px-3 py-2.5 text-base border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none font-bold text-blue-700 bg-blue-50/50" 
-                            placeholder="0" value="${item.width && item.height ? area : (item.quantity || 1)}">
+                            placeholder="0" value="${totalArea}">
                     </div>
 
                     <!-- Đơn giá (VNĐ) -->
-                    <div class="lg:col-span-4">
+                    <div class="lg:col-span-3">
                         <label class="block text-slate-700 font-semibold text-sm mb-1">Đơn giá (đ)</label>
                         <input type="number" step="1000" min="0" class="item-price w-full px-3 py-2.5 text-base border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none bg-white font-medium" 
                             placeholder="0" value="${item.price || ''}">
                     </div>
 
                     <!-- Thành tiền -->
-                    <div class="lg:col-span-4">
+                    <div class="lg:col-span-3">
                         <label class="block text-slate-700 font-semibold text-sm mb-1">Thành tiền</label>
                         <div class="item-total-display px-3 py-2.5 text-lg font-black text-emerald-700 bg-emerald-50 rounded-lg border border-emerald-200">
                             ${formattedTotal}
@@ -94,10 +105,10 @@ const productRow = (function () {
                     </div>
 
                     <!-- Ghi chú riêng cho sản phẩm này -->
-                    <div class="lg:col-span-4">
+                    <div class="lg:col-span-3">
                         <label class="block text-slate-700 font-semibold text-sm mb-1">Ghi chú SP</label>
                         <input type="text" class="item-note w-full px-3 py-2.5 text-base border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none bg-white" 
-                            placeholder="Ví dụ: màu xám, motor rời..." value="${escapeHtml(item.note || '')}">
+                            placeholder="Ví dụ: màu xám..." value="${escapeHtml(item.note || '')}">
                     </div>
                 </div>
             </div>
