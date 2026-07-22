@@ -1,9 +1,11 @@
 /**
  * Component Preview & In Hóa đơn chuẩn 100% theo mẫu hóa đơn thực tế
- * Tích hợp Phân trang thông minh: Tự động vừa 1 trang A4 và Giữ khối Tổng tiền + Chữ ký luôn đi cùng nhau.
+ * Tích hợp Phân trang thông minh và Tự động đặt tên file PDF trên Mobile & Desktop
  */
 
 const preview = (function () {
+    const DEFAULT_APP_TITLE = 'Thế giới Cửa Mạnh Hùng - Hóa Đơn Bán Hàng';
+
     function init(modalContainerId) {
         const modalContainer = document.getElementById(modalContainerId);
         if (!modalContainer) return;
@@ -18,6 +20,9 @@ const preview = (function () {
     function open() {
         const modalContainer = document.getElementById('previewModalContainer');
         if (modalContainer) {
+            if (typeof printer !== 'undefined') {
+                printer.updatePdfTitle();
+            }
             render(modalContainer);
             modalContainer.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -29,10 +34,15 @@ const preview = (function () {
         if (modalContainer) {
             modalContainer.classList.add('hidden');
             document.body.style.overflow = '';
+            document.title = DEFAULT_APP_TITLE;
         }
     }
 
     function render(container) {
+        if (typeof printer !== 'undefined') {
+            printer.updatePdfTitle();
+        }
+
         const state = stateManager.getState();
         const items = state.items || [];
         const totalAmount = stateManager.getTotalAmount();
@@ -82,7 +92,6 @@ const preview = (function () {
                     </tr>
                 `;
             } else {
-                // Dòng trống kẻ sẵn cho hóa đơn ít sản phẩm
                 rowsHtml += `
                     <tr class="invoice-paper-row h-9">
                         <td class="border-r border-b border-blue-600 py-2 px-1 text-center"></td>
@@ -107,7 +116,7 @@ const preview = (function () {
                     <div class="bg-slate-800 text-white p-4 flex items-center justify-between print:hidden">
                         <div class="flex items-center gap-2 font-bold text-lg">
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Xem trước Hóa đơn (Phân Trang Thông Minh)
+                            Xem trước Hóa đơn (Chuẩn Font Times New Roman)
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="printer.printInvoice()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-base flex items-center gap-2 transition-colors shadow-md">

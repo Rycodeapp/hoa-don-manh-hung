@@ -1,39 +1,39 @@
 /**
- * Module Printer Xử lý in Hóa đơn và Tự động đặt tên file khi lưu PDF
+ * Module Printer Xử lý in Hóa đơn và Tự động đặt tên file khi lưu PDF trên cả Máy tính & Điện thoại
  */
 
 const printer = (function () {
-    function printInvoice() {
-        const state = typeof stateManager !== 'undefined' ? stateManager.getState() : {};
-        const originalTitle = document.title;
-
-        // Tạo tên file tự động: [Mã Hóa Đơn] - [Tên Khách Hàng] - Hoa Don Ban Hang
+    function updatePdfTitle() {
+        if (typeof stateManager === 'undefined') return;
+        const state = stateManager.getState();
+        
         const rawBuyerName = state.buyerName ? state.buyerName.trim() : 'KhachHang';
-        // Xóa ký tự đặc biệt không hợp lệ trong tên file
+        // Xóa ký tự không hợp lệ trong tên file
         const cleanBuyerName = rawBuyerName.replace(/[/\\?%*:|"<>]/g, '');
         const invoiceId = state.invoiceId ? state.invoiceId.trim() : 'HD';
 
-        const suggestedFileName = `${invoiceId} - ${cleanBuyerName} - Hoa Don Ban Hang`;
+        // Đặt document.title chuẩn để điện thoại & máy tính đọc được tên file PDF khi Lưu
+        const pdfFileName = `${invoiceId} - ${cleanBuyerName} - Hoa Don Ban Hang`;
+        document.title = pdfFileName;
+    }
 
-        // Đổi document.title tạm thời để trình duyệt tự động điền tên file khi Lưu thành PDF
-        document.title = suggestedFileName;
+    function printInvoice() {
+        // Cập nhật tên file PDF ngay lập tức
+        updatePdfTitle();
 
         // Đảm bảo preview đang mở
         if (typeof preview !== 'undefined') {
             preview.open();
         }
 
-        // Đợi DOM cập nhật rồi mở hộp thoại in / lưu PDF của hệ thống
+        // Gọi lệnh in của hệ thống
         setTimeout(() => {
             window.print();
-            // Khôi phục lại title gốc sau khi đóng hộp thoại in
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 1000);
-        }, 250);
+        }, 150);
     }
 
     return {
+        updatePdfTitle: updatePdfTitle,
         printInvoice: printInvoice
     };
 })();
