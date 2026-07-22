@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thế giới Cửa Mạnh Hùng - Hóa Đơn Bán Hàng</title>
 
     <!-- PWA MANIFEST & META TAGS -->
-    <link rel="manifest" href="./manifest.json?v=2">
-    <meta name="theme-color" content="#1e3a8a">
+    <link rel="manifest" href="./manifest.json?v=3">
+    <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hóa Đơn Cửa">
-    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=2">
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=3">
 
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,48 +22,67 @@
                     colors: {
                         brand: {
                             50: '#eff6ff',
+                            100: '#dbeafe',
                             500: '#3b82f6',
                             600: '#2563eb',
                             700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#0f172a'
                         }
+                    },
+                    borderRadius: {
+                        '2xl': '16px',
+                        'xl': '12px'
                     }
                 }
             }
         }
     </script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <!-- Custom CSS Design System -->
+    <link rel="stylesheet" href="assets/css/style.css?v=3">
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-28">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white min-h-full flex flex-col">
 
-    <!-- HEADER ỨNG DỤNG -->
-    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-md border-b border-blue-700/50">
-        <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-wrap items-center justify-between gap-3">
+    <!-- HEADER ỨNG DỤNG SAAS 2025 (GIẢM 30% CHIỀU CAO, THIẾT KẾ TINH TẾ) -->
+    <header class="bg-slate-900 border-b border-slate-800/80 sticky top-0 z-30 backdrop-blur-md bg-slate-900/90 shadow-sm">
+        <div class="max-w-[1150px] mx-auto px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            
+            <!-- BRANDING & COMPANY INFO -->
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-amber-400 text-blue-950 flex items-center justify-center font-black text-2xl shadow-inner">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xl shadow-sm flex-shrink-0">
                     🚪
                 </div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-                        Thế Giới Cửa Mạnh Hùng
-                    </h1>
-                    <p class="text-blue-200 text-sm md:text-base">
-                        Hóa Đơn Cửa Cuốn - Cửa Kéo - Cửa Đài Loan (SĐT: 0976.088.080 - 0916.557.888)
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg md:text-xl font-bold tracking-tight text-white leading-tight">
+                            Thế Giới Cửa Mạnh Hùng
+                        </h1>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            Enterprise
+                        </span>
+                    </div>
+                    <p class="text-slate-400 text-xs sm:text-sm font-medium mt-0.5 flex flex-wrap items-center gap-x-2">
+                        <span>Hóa Đơn Cửa Cuốn - Cửa Kéo - Cửa Đài Loan</span>
+                        <span class="hidden sm:inline text-slate-600">•</span>
+                        <span class="text-amber-400 font-semibold">SĐT: 0976.088.080 - 0916.557.888</span>
                     </p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2">
-                <button type="button" id="btnInstallPwa" class="hidden px-4 py-2 bg-amber-400 hover:bg-amber-300 text-blue-950 font-bold rounded-xl shadow text-sm items-center gap-1.5 transition-all">
-                    📲 Cài đặt App
+            <!-- ACTION / INSTALL PWA BUTTON -->
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <button type="button" id="btnInstallPwa" class="hidden px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl shadow-sm text-xs sm:text-sm items-center gap-1.5 transition-all active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Cài đặt App</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-5xl mx-auto px-3 sm:px-4 pt-6">
+    <!-- MAIN CONTAINER (1150px MAX WIDTH, CENTERED) -->
+    <main class="max-w-[1150px] w-full mx-auto px-4 sm:px-6 pt-6 pb-32 flex-1">
         
         <!-- COMPONENT 1: FORM KHÁCH HÀNG & ĐƠN VỊ -->
         <section id="customerFormContainer"></section>
@@ -73,44 +92,41 @@
 
     </main>
 
-    <!-- COMPONENT 3: THANH CÔNG CỤ THAO TÁC (TOOLBAR DƯỚI ĐÁY) -->
+    <!-- COMPONENT 3: THANH CÔNG CỤ THAO TÁC STICKY DƯỚI ĐÁY -->
     <div id="toolbarContainer"></div>
 
     <!-- COMPONENT 4: MODAL XEM TRƯỚC HÓA ĐƠN PAPER PREVIEW -->
     <div id="previewModalContainer" class="hidden"></div>
 
     <!-- SCRIPTS CORE MODULES -->
-    <script src="assets/js/vietnameseMoney.js?v=2"></script>
-    <script src="assets/js/formatter.js?v=2"></script>
-    <script src="assets/js/calculator.js?v=2"></script>
-    <script src="assets/js/validation.js?v=2"></script>
-    <script src="assets/js/storage.js?v=2"></script>
-    <script src="assets/js/state.js?v=2"></script>
+    <script src="assets/js/vietnameseMoney.js?v=3"></script>
+    <script src="assets/js/formatter.js?v=3"></script>
+    <script src="assets/js/calculator.js?v=3"></script>
+    <script src="assets/js/validation.js?v=3"></script>
+    <script src="assets/js/storage.js?v=3"></script>
+    <script src="assets/js/state.js?v=3"></script>
 
     <!-- SCRIPTS COMPONENTS -->
-    <script src="assets/components/customerForm.js?v=2"></script>
-    <script src="assets/components/productRow.js?v=2"></script>
-    <script src="assets/components/productTable.js?v=2"></script>
-    <script src="assets/components/toolbar.js?v=2"></script>
-    <script src="assets/components/preview.js?v=2"></script>
-    <script src="assets/js/printer.js?v=2"></script>
+    <script src="assets/components/customerForm.js?v=3"></script>
+    <script src="assets/components/productRow.js?v=3"></script>
+    <script src="assets/components/productTable.js?v=3"></script>
+    <script src="assets/components/toolbar.js?v=3"></script>
+    <script src="assets/components/preview.js?v=3"></script>
+    <script src="assets/js/printer.js?v=3"></script>
 
     <!-- ENTRY POINT & REGISTER SERVICE WORKER -->
-    <script src="assets/js/app.js?v=2"></script>
+    <script src="assets/js/app.js?v=3"></script>
     <script>
-        // Đăng ký Service Worker v2 tự động cập nhật ngay khi mở trang
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js?v=2')
+                navigator.serviceWorker.register('./service-worker.js?v=3')
                     .then(reg => {
                         reg.update();
-                        console.log('PWA ServiceWorker v2 updated!', reg);
                     })
                     .catch(err => console.log('PWA ServiceWorker error:', err));
             });
         }
 
-        // Xử lý nút Cài Đặt PWA App
         let deferredPrompt;
         const btnInstallPwa = document.getElementById('btnInstallPwa');
 

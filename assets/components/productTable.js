@@ -1,5 +1,5 @@
 /**
- * Component Bảng Danh sách Sản phẩm
+ * Component Bảng Danh sách Sản phẩm (SaaS 2025 Standard)
  */
 
 const productTable = (function () {
@@ -34,11 +34,16 @@ const productTable = (function () {
 
         let rowsHtml = '';
         if (items.length === 0) {
+            // EMPTY STATE PREMIUM DESIGN
             rowsHtml = `
-                <div class="text-center py-10 px-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl">
-                    <p class="text-slate-500 text-lg mb-3">Chưa có sản phẩm nào trong hóa đơn</p>
-                    <button type="button" id="btnAddFirstItem" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-bold rounded-xl shadow transition-colors inline-flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <div class="text-center py-12 px-4 bg-slate-50/60 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-50/80 text-blue-600 flex items-center justify-center font-black text-3xl mb-3 shadow-inner">
+                        📦
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">Chưa có sản phẩm nào trong hóa đơn</h3>
+                    <p class="text-slate-500 text-sm max-w-md mb-5">Nhấp vào nút bên dưới để bắt đầu thêm loại cửa hoặc sản phẩm dịch vụ vào hóa đơn.</p>
+                    <button type="button" id="btnAddFirstItem" class="btn-saas h-[50px] px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Thêm sản phẩm đầu tiên
                     </button>
                 </div>
@@ -48,39 +53,51 @@ const productTable = (function () {
         }
 
         container.innerHTML = `
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 mb-6">
-                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+            <div class="card-saas p-5 md:p-6 mb-6">
+                <!-- SECTION HEADER -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-5 border-b border-slate-100">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
+                        <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-base flex-shrink-0">
                             2
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-slate-800">Danh sách Cửa & Sản phẩm</h2>
-                            <p class="text-slate-500 text-sm">Nhập số đo (Ngang x Cao), số bộ cửa và đơn giá</p>
+                            <h2 class="text-[22px] font-bold text-slate-900 leading-tight">Danh sách Cửa & Sản phẩm</h2>
+                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Nhập số đo (Ngang x Cao), số bộ cửa và đơn giá</p>
                         </div>
                     </div>
                     
-                    <button type="button" id="btnAddItem" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <button type="button" id="btnAddItem" class="w-full sm:w-auto btn-saas h-[50px] px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         THÊM CỬA / SẢN PHẨM
                     </button>
                 </div>
 
+                <!-- PRODUCT ROWS CONTAINER -->
                 <div id="productRowsList">
                     ${rowsHtml}
                 </div>
 
-                <!-- TỔNG CỘNG HÓA ĐƠN -->
-                <div class="mt-6 p-5 bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-2xl shadow-lg border border-slate-800">
-                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-700/60 pb-3 mb-3">
-                        <div class="text-slate-300 text-lg font-semibold">TỔNG CỘNG HÓA ĐƠN:</div>
-                        <div class="text-3xl md:text-4xl font-extrabold text-amber-400" id="displayInvoiceTotalAmount">
+                <!-- NÚT THÊM SẢN PHẨM PHÍA DƯỚI DANH SÁCH (KHI ĐÃ CÓ SẢN PHẨM) -->
+                ${items.length > 0 ? `
+                <div class="mt-4 mb-2 flex justify-center">
+                    <button type="button" id="btnAddBottomItem" class="btn-saas h-[48px] px-6 bg-slate-100 hover:bg-blue-50 text-blue-700 font-bold rounded-xl border border-slate-200 hover:border-blue-300 transition-all flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <span>THÊM CỬA / SẢN PHẨM MỚI</span>
+                    </button>
+                </div>
+                ` : ''}
+
+                <!-- TOTAL SUMMARY CARD (PREMIUM SAAS CARD DESIGN) -->
+                <div class="mt-6 p-6 bg-slate-900 text-white rounded-2xl shadow-md border border-slate-800">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-4">
+                        <div class="text-slate-400 text-base font-semibold uppercase tracking-wider">TỔNG CỘNG HÓA ĐƠN</div>
+                        <div class="text-[30px] md:text-[36px] font-extrabold text-amber-400 tracking-tight leading-none" id="displayInvoiceTotalAmount">
                             ${formattedTotal}
                         </div>
                     </div>
-                    <div class="flex items-start gap-2 text-slate-200 text-base md:text-lg">
+                    <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 text-slate-200 text-base md:text-lg">
                         <span class="font-bold text-amber-300 whitespace-nowrap">Bằng chữ:</span>
-                        <span class="italic font-medium text-amber-100" id="displayTotalText">${totalText}</span>
+                        <span class="italic font-semibold text-amber-100" id="displayTotalText">${totalText}</span>
                     </div>
                 </div>
             </div>
@@ -109,6 +126,12 @@ const productTable = (function () {
         const btnAddFirst = container.querySelector('#btnAddFirstItem');
         if (btnAddFirst) {
             btnAddFirst.addEventListener('click', () => {
+                stateManager.addItem({});
+            });
+        }
+        const btnAddBottom = container.querySelector('#btnAddBottomItem');
+        if (btnAddBottom) {
+            btnAddBottom.addEventListener('click', () => {
                 stateManager.addItem({});
             });
         }
