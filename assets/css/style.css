@@ -51,14 +51,21 @@ input, select, textarea, button {
         width: 100% !important;
         box-shadow: none !important;
         border: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
         margin: 0 !important;
     }
 
-    /* Khung giấy hóa đơn khi in */
+    /* Khung giấy hóa đơn khi in: Triệt tiêu hoàn toàn góc bo cong & nới rộng lề trên không bị xén chữ */
     #invoicePaperSheet {
         font-family: 'Times New Roman', Times, serif !important;
         border: none !important;
-        padding: 0 !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+        padding-top: 5mm !important;
+        padding-left: 2mm !important;
+        padding-right: 2mm !important;
+        padding-bottom: 0 !important;
         margin: 0 !important;
         color: #000 !important;
         width: 100% !important;
@@ -98,9 +105,9 @@ input, select, textarea, button {
         border-color: #1e3a8a !important;
     }
 
-    /* Thiết lập trang in A4 */
+    /* Thiết lập trang in A4 có lề trên rộng rãi (10mm) */
     @page {
         size: A4 portrait;
-        margin: 6mm 8mm;
+        margin: 10mm 10mm 8mm 10mm;
     }
 }
