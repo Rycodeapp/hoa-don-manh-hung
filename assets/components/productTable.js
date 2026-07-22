@@ -40,7 +40,7 @@ const productTable = (function () {
                     <p class="text-slate-500 text-lg mb-3">Chưa có sản phẩm nào trong hóa đơn</p>
                     <button type="button" id="btnAddFirstItem" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-bold rounded-xl shadow transition-colors inline-flex items-center gap-2">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        ➕ Thêm sản phẩm đầu tiên
+                        Thêm sản phẩm đầu tiên
                     </button>
                 </div>
             `;
@@ -63,7 +63,7 @@ const productTable = (function () {
                     
                     <button type="button" id="btnAddItem" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        ➕ THÊM CỬA / SẢN PHẨM
+                        THÊM CỬA / SẢN PHẨM
                     </button>
                 </div>
 
@@ -157,7 +157,6 @@ const productTable = (function () {
                     totalDisplayDiv.textContent = typeof formatter !== 'undefined' ? formatter.formatCurrency(total) : total + ' đ';
                 }
 
-                // Cập nhật state âm thầm (silent = true) -> KHÔNG phá hủy DOM -> KHÔNG mất focus!
                 stateManager.updateItem(id, {
                     productName: nameInp.value,
                     unit: unitSelect.value,
@@ -170,7 +169,6 @@ const productTable = (function () {
                     note: noteInp.value
                 }, true);
 
-                // Cập nhật ô tổng hóa đơn bên dưới
                 updateTotalsOnly(container);
             };
 
