@@ -1,6 +1,6 @@
 /**
  * Component Preview & In Hóa đơn / Báo giá chuẩn 100% theo mẫu thực tế
- * Tích hợp Phân trang thông minh và Tùy chỉnh Tiêu đề Chứng từ (HÓA ĐƠN / BÁO GIÁ / BẢNG BÁO GIÁ)
+ * Tích hợp Tự động điều chỉnh Cỡ chữ (Auto Font Scaling) khi chữ quá dài hoặc nhiều sản phẩm
  */
 
 const preview = (function () {
@@ -38,6 +38,19 @@ const preview = (function () {
         }
     }
 
+    /**
+     * Hàm tự động tính toán cỡ chữ thông minh dựa theo độ dài tên sản phẩm & số lượng dòng
+     */
+    function getProductFontClass(text, isDenseSheet) {
+        const len = (text || '').length;
+        if (len > 140) {
+            return isDenseSheet ? 'text-[10px] leading-[1.2]' : 'text-[11px] leading-[1.25]';
+        } else if (len > 70) {
+            return isDenseSheet ? 'text-[11px] leading-[1.25]' : 'text-[12px] leading-[1.3]';
+        }
+        return isDenseSheet ? 'text-xs leading-snug' : 'text-sm leading-snug';
+    }
+
     function render(container) {
         if (typeof printer !== 'undefined') {
             printer.updatePdfTitle();
@@ -60,7 +73,9 @@ const preview = (function () {
             }
         }
 
-        const isDense = items.length > 8;
+        // Tự động đo độ dày dữ liệu để co giãn cỡ chữ toàn trang
+        const maxTextLen = items.reduce((max, item) => Math.max(max, (item.productName || '').length), 0);
+        const isDense = items.length > 8 || maxTextLen > 90;
         const targetMinRows = isDense ? items.length : 8;
         let rowsHtml = '';
 
@@ -83,19 +98,20 @@ const preview = (function () {
                 const priceStr = item.price ? formatter.formatCurrency(item.price, false) : '';
                 const totalStr = item.total ? formatter.formatCurrency(item.total, false) : '';
 
-                const cellPaddingClass = isDense ? 'py-1 px-1.5 text-xs' : 'py-2 px-2 text-sm';
+                const fontClass = getProductFontClass(item.productName, isDense);
+                const cellPaddingClass = isDense ? 'py-1 px-1.5' : 'py-2 px-2';
 
                 rowsHtml += `
                     <tr class="invoice-paper-row">
-                        <td class="text-center font-medium border-r border-b border-blue-600 ${cellPaddingClass}">${i + 1}</td>
-                        <td class="border-r border-b border-blue-600 ${cellPaddingClass} font-semibold text-slate-900 leading-snug">
-                            <div class="invoice-product-name whitespace-pre-wrap break-words">${escapeHtml(item.productName || '')}</div>
-                            ${item.note ? `<div class="text-[11px] font-normal italic text-slate-600 mt-0.5">Ghi chú SP: ${escapeHtml(item.note)}</div>` : ''}
+                        <td class="text-center font-medium border-r border-b border-blue-600 ${cellPaddingClass} ${isDense ? 'text-xs' : 'text-sm'}">${i + 1}</td>
+                        <td class="border-r border-b border-blue-600 ${cellPaddingClass} font-semibold text-slate-900">
+                            <div class="invoice-product-name whitespace-pre-wrap break-words ${fontClass}">${escapeHtml(item.productName || '')}</div>
+                            ${item.note ? `<div class="text-[10px] font-normal italic text-slate-600 mt-0.5">Ghi chú SP: ${escapeHtml(item.note)}</div>` : ''}
                         </td>
-                        <td class="text-center border-r border-b border-blue-600 ${cellPaddingClass}">${escapeHtml(item.unit || '')}</td>
-                        <td class="text-center border-r border-b border-blue-600 ${cellPaddingClass} font-medium">${qtyDisplay}</td>
-                        <td class="text-right border-r border-b border-blue-600 ${cellPaddingClass} font-medium">${priceStr}</td>
-                        <td class="text-right border-r border-b border-blue-600 ${cellPaddingClass} font-extrabold text-blue-950">${totalStr}</td>
+                        <td class="text-center border-r border-b border-blue-600 ${cellPaddingClass} ${isDense ? 'text-xs' : 'text-sm'}">${escapeHtml(item.unit || '')}</td>
+                        <td class="text-center border-r border-b border-blue-600 ${cellPaddingClass} font-medium ${isDense ? 'text-xs' : 'text-sm'}">${qtyDisplay}</td>
+                        <td class="text-right border-r border-b border-blue-600 ${cellPaddingClass} font-medium ${isDense ? 'text-xs' : 'text-sm'}">${priceStr}</td>
+                        <td class="text-right border-r border-b border-blue-600 ${cellPaddingClass} font-extrabold text-blue-950 ${isDense ? 'text-sm' : 'text-base'}">${totalStr}</td>
                     </tr>
                 `;
             } else {
@@ -123,7 +139,7 @@ const preview = (function () {
                     <div class="bg-slate-800 text-white p-4 flex items-center justify-between print:hidden">
                         <div class="flex items-center gap-2 font-bold text-lg">
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Xem trước ${escapeHtml(docTitleHeader)} (Chuẩn Font Times New Roman)
+                            Xem trước ${escapeHtml(docTitleHeader)} (Tự Động Co Giãn Font)
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="printer.printInvoice()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-base flex items-center gap-2 transition-colors shadow-md">
@@ -136,12 +152,11 @@ const preview = (function () {
                         </div>
                     </div>
 
-                    <!-- GIẤY HÓA ĐƠN / BÁO GIÁ VỚI PHÂN TRANG THÔNG MINH -->
+                    <!-- GIẤY HÓA ĐƠN VỚI TỰ ĐỘNG THU NHỎ FONT KHI NHIỀU CHỮ -->
                     <div id="invoicePaperSheet" class="p-6 md:p-10 bg-white text-blue-900 border-4 border-double border-blue-500 print:border-none print:p-0 ${sheetDensityClass}" style="font-family: 'Times New Roman', Times, serif;">
                         
                         <!-- PHẦN ĐẦU CHỨNG TỪ -->
                         <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-2">
-                            <!-- Bên trái: Đơn vị, SĐT Người bán, Người mua, SĐT Người mua, Địa chỉ, Kho -->
                             <div class="flex-1 space-y-1 text-base md:text-lg w-full">
                                 <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                                     <div class="flex items-baseline gap-2 flex-1 min-w-[280px]">
@@ -181,7 +196,6 @@ const preview = (function () {
                                 </div>
                             </div>
 
-                            <!-- Bên phải: Tiêu đề TIÊU ĐỀ CHỨNG TỪ (HÓA ĐƠN / BÁO GIÁ) -->
                             <div class="text-center md:text-right w-full md:w-auto min-w-[150px]">
                                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-wider text-blue-800 uppercase mb-0.5">
                                     ${escapeHtml(docTitleHeader)}
