@@ -4,32 +4,37 @@
 
 const stateManager = (function () {
     /**
-     * Thuật toán sinh Mã Chứng Từ Tự Động Không Trùng Lặp 100%
-     * Kết hợp Số thứ tự theo ngày (HD2307-001, HD2307-002...) + Mã hóa Crypto Random
+     * Lấy chuỗi Ngày Hôm Nay dạng YYYY-MM-DD theo giờ địa phương
      */
-    function generateRandomInvoiceId() {
+    function getTodayDateString() {
         const now = new Date();
-        const dd = String(now.getDate()).padStart(2, '0');
+        const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const yy = String(now.getFullYear()).slice(-2);
+        const dd = String(now.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    /**
+     * Thuật toán sinh Mã Chứng Từ Tự Động Theo Năm-Tháng-Ngày (YYMMDD)
+     * Format: HD[YYMMDD]-[001, 002...] (Tự tăng theo ngày)
+     */
+    function generateRandomInvoiceId(customDateStr) {
+        const dateVal = customDateStr ? new Date(customDateStr) : new Date();
+        const validDate = isNaN(dateVal.getTime()) ? new Date() : dateVal;
+
+        const yy = String(validDate.getFullYear()).slice(-2);
+        const mm = String(validDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(validDate.getDate()).padStart(2, '0');
+
+        const now = new Date();
         const hh = String(now.getHours()).padStart(2, '0');
         const min = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
 
-        // Tạo số ngẫu nhiên Crypto Random an toàn
-        let cryptoRand = 0;
-        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-            const array = new Uint32Array(1);
-            window.crypto.getRandomValues(array);
-            cryptoRand = (array[0] % 9000) + 1000;
-        } else {
-            cryptoRand = Math.floor(1000 + Math.random() * 9000);
-        }
-
-        // Tự động đếm và tăng số thứ tự hóa đơn trong ngày
+        // Bộ đếm tự tăng theo ngày (YYMMDD)
+        const dateKey = `${yy}${mm}${dd}`;
         let counterStr = '';
         try {
-            const todayKey = `MH_COUNTER_${dd}${mm}${yy}`;
+            const todayKey = `MH_COUNTER_${dateKey}`;
             let currentCounter = parseInt(localStorage.getItem(todayKey) || '0', 10) + 1;
             localStorage.setItem(todayKey, currentCounter.toString());
             counterStr = String(currentCounter).padStart(3, '0');
@@ -38,15 +43,24 @@ const stateManager = (function () {
         }
 
         if (counterStr) {
-            return `HD${dd}${mm}-${counterStr}`;
+            return `HD${dateKey}-${counterStr}`;
         }
 
-        // Fallback: HD[DDMM]-[HHMMSS][Crypto 2 chữ số] -> Đảm bảo 100% tuyệt đối không trùng lặp
-        const shortRand = String(cryptoRand).slice(-2);
-        return `HD${dd}${mm}-${hh}${min}${ss}${shortRand}`;
+        // Fallback: HD[YYMMDD]-[HHMM][Crypto 2 chữ số]
+        let cryptoRand = 0;
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            cryptoRand = (array[0] % 90) + 10;
+        } else {
+            cryptoRand = Math.floor(10 + Math.random() * 90);
+        }
+
+        return `HD${dateKey}-${hh}${min}${cryptoRand}`;
     }
 
     // Trạng thái mặc định
+    const todayDate = getTodayDateString();
     let state = {
         unitName: 'Thế giới Cửa Mạnh Hùng',
         invoiceTitle: 'HÓA ĐƠN',
@@ -55,8 +69,9 @@ const stateManager = (function () {
         buyerPhone: '',
         address: '',
         warehouse: '',
-        invoiceId: generateRandomInvoiceId(),
-        createdDate: new Date().toISOString().split('T')[0],
+        invoiceId: generateRandomInvoiceId(todayDate),
+        createdDate: todayDate,
+        isManualDate: false, // Flag đánh dấu người dùng đã tự tay chỉnh ngày hay chưa
         generalNote: 'Bảo hành 24 tháng đối với motor và 12 tháng đối với thân cửa.',
         items: [
             {
@@ -123,9 +138,15 @@ const stateManager = (function () {
         state.buyerPhone = data.buyerPhone !== undefined ? data.buyerPhone : state.buyerPhone;
         state.address = data.address !== undefined ? data.address : state.address;
         state.warehouse = data.warehouse !== undefined ? data.warehouse : state.warehouse;
-        state.createdDate = data.createdDate !== undefined ? data.createdDate : state.createdDate;
         state.invoiceId = data.invoiceId !== undefined ? data.invoiceId : state.invoiceId;
         state.generalNote = data.generalNote !== undefined ? data.generalNote : state.generalNote;
+
+        if (data.createdDate !== undefined) {
+            state.createdDate = data.createdDate;
+            if (data.isManualDate !== undefined) {
+                state.isManualDate = data.isManualDate;
+            }
+        }
 
         if (typeof storage !== 'undefined') {
             storage.saveInvoiceState(state);
@@ -237,6 +258,13 @@ const stateManager = (function () {
             const saved = storage.loadInvoiceState();
             if (saved && Array.isArray(saved.items)) {
                 state = Object.assign({}, state, saved);
+
+                // Nếu người dùng KHÔNG tự tay sửa ngày trước đó, tự động cập nhật về ngày HÔM NAY
+                if (!saved.isManualDate) {
+                    state.createdDate = getTodayDateString();
+                    state.isManualDate = false;
+                }
+
                 recalculate();
                 notify();
             }
@@ -255,7 +283,8 @@ const stateManager = (function () {
         getTotalText: getTotalText,
         subscribe: subscribe,
         loadSavedState: loadSavedState,
-        generateRandomInvoiceId: generateRandomInvoiceId
+        generateRandomInvoiceId: generateRandomInvoiceId,
+        getTodayDateString: getTodayDateString
     };
 })();
 

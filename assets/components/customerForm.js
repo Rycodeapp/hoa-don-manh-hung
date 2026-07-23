@@ -57,22 +57,22 @@ const customerForm = (function () {
                         </div>
                     </div>
 
-                    <!-- Mã Số Chứng Từ (Có nút sinh ngẫu nhiên 🔀 không bao giờ trùng) -->
+                    <!-- Mã Số Chứng Từ (Theo YYMMDD + Crypto Random) -->
                     <div>
                         <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
                             Mã số chứng từ
                         </label>
                         <div class="flex gap-2">
                             <input type="text" id="inputInvoiceId" value="${escapeHtml(state.invoiceId || '')}" 
-                                placeholder="HD2307-001..." 
+                                placeholder="HD260723-001..." 
                                 class="form-input-custom font-bold text-slate-900 flex-1">
-                            <button type="button" id="btnRandomizeInvoiceId" title="Tạo mã ngẫu nhiên mới" class="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-bold rounded-xl border border-slate-200 transition-all flex items-center justify-center text-base">
+                            <button type="button" id="btnRandomizeInvoiceId" title="Tạo mã ngẫu nhiên mới theo ngày" class="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-bold rounded-xl border border-slate-200 transition-all flex items-center justify-center text-base">
                                 🔀
                             </button>
                         </div>
                     </div>
 
-                    <!-- Ngày lập hóa đơn -->
+                    <!-- Ngày lập chứng từ (Tự động hôm nay nếu chưa sửa thủ công) -->
                     <div>
                         <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
                             Ngày lập chứng từ
@@ -156,7 +156,7 @@ const customerForm = (function () {
     }
 
     function bindEvents(container) {
-        const fieldIds = ['inputInvoiceTitle', 'inputInvoiceId', 'inputUnitName', 'inputSellerPhone', 'inputBuyerName', 'inputBuyerPhone', 'inputAddress', 'inputWarehouse', 'inputCreatedDate', 'inputGeneralNote'];
+        const fieldIds = ['inputInvoiceTitle', 'inputInvoiceId', 'inputUnitName', 'inputSellerPhone', 'inputBuyerName', 'inputBuyerPhone', 'inputAddress', 'inputWarehouse', 'inputGeneralNote'];
 
         const handleInput = () => {
             stateManager.updateCustomer({
@@ -168,7 +168,6 @@ const customerForm = (function () {
                 buyerPhone: container.querySelector('#inputBuyerPhone').value,
                 address: container.querySelector('#inputAddress').value,
                 warehouse: container.querySelector('#inputWarehouse').value,
-                createdDate: container.querySelector('#inputCreatedDate').value,
                 generalNote: container.querySelector('#inputGeneralNote').value
             }, true);
         };
@@ -180,11 +179,24 @@ const customerForm = (function () {
             }
         });
 
-        // Xử lý nút 🔀 Đổi mã ngẫu nhiên mới
+        // Xử lý riêng sự kiện người dùng tự thay đổi ngày lập chứng từ (isManualDate: true)
+        const dateInput = container.querySelector('#inputCreatedDate');
+        if (dateInput) {
+            dateInput.addEventListener('change', () => {
+                const selectedDate = dateInput.value;
+                stateManager.updateCustomer({
+                    createdDate: selectedDate,
+                    isManualDate: true
+                }, true);
+            });
+        }
+
+        // Xử lý nút 🔀 Đổi mã ngẫu nhiên mới dựa theo Ngày đã chọn
         const btnRandom = container.querySelector('#btnRandomizeInvoiceId');
         if (btnRandom) {
             btnRandom.addEventListener('click', () => {
-                const newCode = stateManager.generateRandomInvoiceId();
+                const currentDate = dateInput ? dateInput.value : null;
+                const newCode = stateManager.generateRandomInvoiceId(currentDate);
                 const idInput = container.querySelector('#inputInvoiceId');
                 if (idInput) {
                     idInput.value = newCode;
@@ -195,7 +207,7 @@ const customerForm = (function () {
 
         stateManager.subscribe(newState => {
             const activeEl = document.activeElement;
-            fieldIds.forEach(id => {
+            fieldIds.concat(['inputCreatedDate']).forEach(id => {
                 const inputEl = container.querySelector('#' + id);
                 if (inputEl && inputEl !== activeEl) {
                     const keyMap = {
