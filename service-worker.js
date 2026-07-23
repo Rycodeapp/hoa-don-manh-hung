@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hoa-don-manh-hung-v2';
+const CACHE_NAME = 'hoa-don-manh-hung-v4';
 const ASSETS_TO_CACHE = [
     './index.html',
     './manifest.json',
@@ -9,6 +9,7 @@ const ASSETS_TO_CACHE = [
     './assets/js/validation.js',
     './assets/js/storage.js',
     './assets/js/state.js',
+    './assets/js/pdfImport.js',
     './assets/components/customerForm.js',
     './assets/components/productRow.js',
     './assets/components/productTable.js',
@@ -18,18 +19,16 @@ const ASSETS_TO_CACHE = [
     './assets/js/app.js'
 ];
 
-// Cài đặt Service Worker và lập tức kích hoạt phiên bản mới
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('[Service Worker] Caching updated static assets v2');
+            console.log('[Service Worker] Caching updated static assets v4 with PDF Import Engine');
             return cache.addAll(ASSETS_TO_CACHE);
         })
     );
 });
 
-// Kích hoạt và dọn dẹp TOÀN BỘ cache cũ
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
@@ -45,7 +44,6 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Lấy dữ liệu từ Network trước, nếu mất mạng mới lấy Cache
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         fetch(event.request)

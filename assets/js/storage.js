@@ -1,90 +1,60 @@
 /**
- * Module StorageService quản lý lưu trữ LocalStorage & Lịch sử Undo
+ * Module Storage Quản lý lưu trữ LocalStorage & Undo History Stack
  */
 
 const storage = (function () {
-    const STORAGE_KEY = 'HOA_DON_APP_DATA_V1';
-    const MAX_UNDO_STACK = 20;
+    const STORAGE_KEY = 'HOA_DON_MANH_HUNG_STATE';
+    const UNDO_STACK_KEY = 'HOA_DON_MANH_HUNG_UNDO_STACK';
+    const MAX_UNDO_STEPS = 20;
+
     let undoStack = [];
 
-    /**
-     * Tải dữ liệu hóa đơn đã lưu từ LocalStorage
-     */
-    function loadInvoiceState() {
-        try {
-            const rawData = localStorage.getItem(STORAGE_KEY);
-            if (rawData) {
-                return JSON.parse(rawData);
-            }
-        } catch (e) {
-            console.error('Lỗi khi đọc LocalStorage:', e);
-        }
-        return null;
-    }
-
-    /**
-     * Lưu trạng thái hóa đơn hiện tại vào LocalStorage
-     */
     function saveInvoiceState(state) {
         try {
-            const serialized = JSON.stringify(state);
-            localStorage.setItem(STORAGE_KEY, serialized);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } catch (e) {
-            console.error('Lỗi khi ghi LocalStorage:', e);
+            console.error('Lỗi khi lưu state vào LocalStorage:', e);
         }
     }
 
-    /**
-     * Đẩy trạng thái hiện tại vào stack Undo trước khi xóa/thay đổi lớn
-     */
-    function pushUndoState(state) {
+    function loadInvoiceState() {
         try {
-            const snapshot = JSON.parse(JSON.stringify(state));
-            undoStack.push(snapshot);
-            if (undoStack.length > MAX_UNDO_STACK) {
-                undoStack.shift();
-            }
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : null;
         } catch (e) {
-            console.error('Lỗi khi lưu Undo state:', e);
+            console.error('Lỗi khi tải state từ LocalStorage:', e);
+            return null;
         }
     }
 
-    /**
-     * Lấy lại trạng thái liền trước đó (Undo)
-     */
+    function pushUndoState(state) {
+        if (!state) return;
+        undoStack.push(JSON.parse(JSON.stringify(state)));
+        if (undoStack.length > MAX_UNDO_STEPS) {
+            undoStack.shift();
+        }
+    }
+
     function popUndoState() {
-        if (undoStack.length > 0) {
-            return undoStack.pop();
-        }
-        return null;
+        if (undoStack.length === 0) return null;
+        return undoStack.pop();
     }
 
-    /**
-     * Kiểm tra có thể Undo hay không
-     */
     function canUndo() {
         return undoStack.length > 0;
     }
 
-    /**
-     * Xóa sạch dữ liệu đã lưu
-     */
-    function clearStorage() {
-        try {
-            localStorage.removeItem(STORAGE_KEY);
-            undoStack = [];
-        } catch (e) {
-            console.error('Lỗi khi xóa LocalStorage:', e);
-        }
+    function clearUndoStack() {
+        undoStack = [];
     }
 
     return {
-        loadInvoiceState: loadInvoiceState,
         saveInvoiceState: saveInvoiceState,
+        loadInvoiceState: loadInvoiceState,
         pushUndoState: pushUndoState,
         popUndoState: popUndoState,
         canUndo: canUndo,
-        clearStorage: clearStorage
+        clearUndoStack: clearUndoStack
     };
 })();
 

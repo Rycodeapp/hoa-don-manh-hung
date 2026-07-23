@@ -1,6 +1,6 @@
 /**
  * Component Preview & In Hóa đơn / Báo giá chuẩn 100% theo mẫu thực tế
- * Tích hợp Tự động điều chỉnh Cỡ chữ (Auto Font Scaling) khi chữ quá dài hoặc nhiều sản phẩm
+ * Tích hợp Tự động điều chỉnh Cỡ chữ và Tự động Nhúng dữ liệu gốc (PDF Restore Engine)
  */
 
 const preview = (function () {
@@ -61,6 +61,9 @@ const preview = (function () {
         const totalAmount = stateManager.getTotalAmount();
         const totalText = stateManager.getTotalText();
         const docTitleHeader = state.invoiceTitle ? state.invoiceTitle.toUpperCase().trim() : 'HÓA ĐƠN';
+
+        // Tạo chuỗi JSON nhúng dữ liệu gốc
+        const embeddedPayload = typeof pdfImport !== 'undefined' ? pdfImport.createEmbeddedPayload(state) : '';
 
         // Xử lý ngày tháng năm
         let dayStr = '......', monthStr = '......', yearStr = '.........';
@@ -152,9 +155,14 @@ const preview = (function () {
                         </div>
                     </div>
 
-                    <!-- GIẤY HÓA ĐƠN VỚI TỰ ĐỘNG THU NHỎ FONT KHI NHIỀU CHỮ -->
+                    <!-- GIẤY HÓA ĐƠN VỚI TỰ ĐỘNG THU NHỎ FONT VÀ NHÚNG DỮ LIỆU GỐC -->
                     <div id="invoicePaperSheet" class="p-6 md:p-10 bg-white text-blue-900 border-4 border-double border-blue-500 print:border-none print:p-0 ${sheetDensityClass}" style="font-family: 'Times New Roman', Times, serif;">
                         
+                        <!-- CHUỖI NHÚNG DỮ LIỆU GỐC ĐỂ KHÔI PHỤC TỪ FILE PDF -->
+                        <div id="MANH_HUNG_EMBEDDED_DATA" style="display:none !important; font-size:0px; line-height:0; color:transparent; opacity:0; visibility:hidden;" aria-hidden="true">
+                            ${embeddedPayload}
+                        </div>
+
                         <!-- PHẦN ĐẦU CHỨNG TỪ -->
                         <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-2">
                             <div class="flex-1 space-y-1 text-base md:text-lg w-full">

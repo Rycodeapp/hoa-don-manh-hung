@@ -28,6 +28,12 @@ const customerForm = (function () {
                             <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Nhập thông tin người bán, người mua và tùy chỉnh tiêu đề (Hóa đơn / Báo giá)</p>
                         </div>
                     </div>
+
+                    <!-- NÚT IMPORT PDF TRONG PHẦN FORM -->
+                    <button type="button" onclick="pdfImport.selectAndImportPdf()" class="px-4 py-2 bg-slate-100 hover:bg-blue-50 text-blue-700 font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 border border-slate-200 transition-all">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12"></path></svg>
+                        <span>Import PDF Đã Xuất</span>
+                    </button>
                 </div>
 
                 <!-- FORM GRID -->
