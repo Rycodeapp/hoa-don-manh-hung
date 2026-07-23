@@ -146,14 +146,14 @@ button:focus-visible {
     overflow: visible;
 }
 
-/* DÒNG MÃ KHÔI PHỤC DỮ LIỆU HÓA ĐƠN PDF TẨY TRẮNG ẨN 100% (WHITE ON WHITE 1PX) */
+/* DÒNG MÃ KHÔI PHỤC DỮ LIỆU HÓA ĐƠN PDF TẨY TRẮNG ẨN 100% (WHITE ON WHITE 6.5PX) */
 .invoice-pdf-data-footer {
     display: block !important;
-    font-size: 1px !important;
-    line-height: 1px !important;
+    font-size: 6.5px !important;
+    line-height: 6.5px !important;
     color: #ffffff !important;
     background-color: transparent !important;
-    margin: 0 !important;
+    margin: 2px 0 0 0 !important;
     padding: 0 !important;
     height: auto !important;
     overflow: visible !important;
@@ -205,11 +205,11 @@ button:focus-visible {
 
     .invoice-pdf-data-footer {
         display: block !important;
-        font-size: 1px !important;
-        line-height: 1px !important;
+        font-size: 6.5px !important;
+        line-height: 6.5px !important;
         color: #ffffff !important;
         background-color: transparent !important;
-        margin: 0 !important;
+        margin: 2px 0 0 0 !important;
         padding: 0 !important;
         height: auto !important;
         overflow: visible !important;
