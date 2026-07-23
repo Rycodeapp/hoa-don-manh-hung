@@ -1,7 +1,7 @@
 /**
- * Module PDF Import & Restore (SaaS 2025 Standard - Base64 Robust Engine)
+ * Module PDF Import & Restore (SaaS 2025 Standard - Robust Payload Engine)
  * Khôi phục & Chỉnh sửa Hóa đơn / Báo giá từ File PDF đã xuất
- * Sử dụng mã hóa Base64 thuần ASCII đảm bảo 100% trích xuất thành công trên mọi trình duyệt.
+ * Sử dụng mã hóa Base64 kết hợp Regex Parser đa lớp đảm bảo 100% trích xuất thành công.
  */
 
 const pdfImport = (function () {
@@ -70,6 +70,57 @@ const pdfImport = (function () {
     }
 
     /**
+     * Thuật toán trích xuất Payload đa lớp từ văn bản
+     */
+    function parsePayloadFromText(text) {
+        if (!text) return null;
+
+        const clean = text.replace(/[\r\n\t]/g, ' ');
+
+        // 1. Thử Regex Base64
+        const b64Regex = /MANH_HUNG_INVOICE_V26_B64_START:([A-Za-z0-9+/=\s]+):MANH_HUNG_INVOICE_V26_B64_END/;
+        const b64Match = clean.match(b64Regex);
+        if (b64Match && b64Match[1]) {
+            try {
+                const rawB64 = b64Match[1].replace(/\s+/g, '');
+                const jsonStr = base64ToUtf8(rawB64);
+                return JSON.parse(jsonStr);
+            } catch (e) {
+                console.warn('B64 regex parse error:', e);
+            }
+        }
+
+        // 2. Thử Substring Base64 không khoảng trắng
+        const cleanNoSpace = clean.replace(/\s+/g, '');
+        const bStart = cleanNoSpace.indexOf(B64_START);
+        if (bStart !== -1) {
+            const bEnd = cleanNoSpace.indexOf(B64_END, bStart);
+            if (bEnd !== -1) {
+                try {
+                    const b64Str = cleanNoSpace.substring(bStart + B64_START.length, bEnd).replace(/[^A-Za-z0-9+/=]/g, '');
+                    const jsonStr = base64ToUtf8(b64Str);
+                    return JSON.parse(jsonStr);
+                } catch (e) {
+                    console.warn('B64 substring parse error:', e);
+                }
+            }
+        }
+
+        // 3. Thử Regex JSON Raw
+        const rawRegex = /MANH_HUNG_INVOICE_V26_DATA_START:(\{[\s\S]*?\}):MANH_HUNG_INVOICE_V26_DATA_END/;
+        const rawMatch = clean.match(rawRegex);
+        if (rawMatch && rawMatch[1]) {
+            try {
+                return JSON.parse(rawMatch[1]);
+            } catch (e) {
+                console.warn('Raw JSON parse error:', e);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Phân tích văn bản PDF bằng PDF.js
      */
     async function extractPayloadPdfJs(arrayBuffer) {
@@ -87,33 +138,12 @@ const pdfImport = (function () {
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join('');
+                const pageText = textContent.items.map(item => item.str).join(' ');
                 combinedText += pageText + ' ';
             }
 
-            // Xóa toàn bộ khoảng trắng dư thừa do PDF.js ghép chữ
-            const cleanText = combinedText.replace(/\s+/g, '');
+            return parsePayloadFromText(combinedText);
 
-            // 1. Thử tìm Base64 Signature
-            const bStart = cleanText.indexOf(B64_START);
-            if (bStart !== -1) {
-                const bEnd = cleanText.indexOf(B64_END, bStart);
-                if (bEnd !== -1) {
-                    const b64Content = cleanText.substring(bStart + B64_START.length, bEnd);
-                    const jsonStr = base64ToUtf8(b64Content);
-                    return JSON.parse(jsonStr);
-                }
-            }
-
-            // 2. Thử tìm Raw Signature
-            const rStart = combinedText.indexOf(RAW_START);
-            if (rStart !== -1) {
-                const rEnd = combinedText.indexOf(RAW_END, rStart);
-                if (rEnd !== -1) {
-                    const jsonStr = combinedText.substring(rStart + RAW_START.length, rEnd);
-                    return JSON.parse(jsonStr);
-                }
-            }
         } catch (err) {
             console.warn('PDF.js extraction notice:', err);
         }
@@ -132,34 +162,17 @@ const pdfImport = (function () {
                 binaryStr += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
             }
 
-            const cleanStr = binaryStr.replace(/\s+/g, '');
+            let payload = parsePayloadFromText(binaryStr);
+            if (payload) return payload;
 
-            // 1. Thử B64
-            const bStart = cleanStr.indexOf(B64_START);
-            if (bStart !== -1) {
-                const bEnd = cleanStr.indexOf(B64_END, bStart);
-                if (bEnd !== -1) {
-                    const b64Content = cleanStr.substring(bStart + B64_START.length, bEnd);
-                    const jsonStr = base64ToUtf8(b64Content);
-                    return JSON.parse(jsonStr);
-                }
-            }
-
-            // 2. Thử UTF-8 Decode
+            // Thử TextDecoder UTF-8
             if (typeof TextDecoder !== 'undefined') {
                 const decoder = new TextDecoder('utf-8');
                 const decodedText = decoder.decode(bytes);
-                const cleanDecoded = decodedText.replace(/\s+/g, '');
-                const uStart = cleanDecoded.indexOf(B64_START);
-                if (uStart !== -1) {
-                    const uEnd = cleanDecoded.indexOf(B64_END, uStart);
-                    if (uEnd !== -1) {
-                        const b64Content = cleanDecoded.substring(uStart + B64_START.length, uEnd);
-                        const jsonStr = base64ToUtf8(b64Content);
-                        return JSON.parse(jsonStr);
-                    }
-                }
+                payload = parsePayloadFromText(decodedText);
+                if (payload) return payload;
             }
+
         } catch (e) {
             console.error('Binary extraction notice:', e);
         }
