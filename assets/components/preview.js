@@ -1,6 +1,6 @@
 /**
- * Component Preview & In Hóa đơn chuẩn 100% theo mẫu hóa đơn thực tế
- * Tích hợp Phân trang thông minh, hiển thị đầy đủ 100% tên sản phẩm không bị cắt bớt
+ * Component Preview & In Hóa đơn / Báo giá chuẩn 100% theo mẫu thực tế
+ * Tích hợp Phân trang thông minh và Tùy chỉnh Tiêu đề Chứng từ (HÓA ĐƠN / BÁO GIÁ / BẢNG BÁO GIÁ)
  */
 
 const preview = (function () {
@@ -47,6 +47,7 @@ const preview = (function () {
         const items = state.items || [];
         const totalAmount = stateManager.getTotalAmount();
         const totalText = stateManager.getTotalText();
+        const docTitleHeader = state.invoiceTitle ? state.invoiceTitle.toUpperCase().trim() : 'HÓA ĐƠN';
 
         // Xử lý ngày tháng năm
         let dayStr = '......', monthStr = '......', yearStr = '.........';
@@ -122,12 +123,12 @@ const preview = (function () {
                     <div class="bg-slate-800 text-white p-4 flex items-center justify-between print:hidden">
                         <div class="flex items-center gap-2 font-bold text-lg">
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Xem trước Hóa đơn (Hiển thị 100% Chữ)
+                            Xem trước ${escapeHtml(docTitleHeader)} (Chuẩn Font Times New Roman)
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="printer.printInvoice()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-base flex items-center gap-2 transition-colors shadow-md">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                In Hóa Đơn (PDF)
+                                In ${escapeHtml(docTitleHeader)} (PDF)
                             </button>
                             <button type="button" onclick="preview.close()" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl text-base transition-colors">
                                 ✕ Đóng
@@ -135,10 +136,10 @@ const preview = (function () {
                         </div>
                     </div>
 
-                    <!-- GIẤY HÓA ĐƠN VỚI PHÂN TRANG THÔNG MINH -->
+                    <!-- GIẤY HÓA ĐƠN / BÁO GIÁ VỚI PHÂN TRANG THÔNG MINH -->
                     <div id="invoicePaperSheet" class="p-6 md:p-10 bg-white text-blue-900 border-4 border-double border-blue-500 print:border-none print:p-0 ${sheetDensityClass}" style="font-family: 'Times New Roman', Times, serif;">
                         
-                        <!-- PHẦN ĐẦU HÓA ĐƠN -->
+                        <!-- PHẦN ĐẦU CHỨNG TỪ -->
                         <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-2">
                             <!-- Bên trái: Đơn vị, SĐT Người bán, Người mua, SĐT Người mua, Địa chỉ, Kho -->
                             <div class="flex-1 space-y-1 text-base md:text-lg w-full">
@@ -180,10 +181,10 @@ const preview = (function () {
                                 </div>
                             </div>
 
-                            <!-- Bên phải: Tiêu đề HÓA ĐƠN -->
+                            <!-- Bên phải: Tiêu đề TIÊU ĐỀ CHỨNG TỪ (HÓA ĐƠN / BÁO GIÁ) -->
                             <div class="text-center md:text-right w-full md:w-auto min-w-[150px]">
                                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-wider text-blue-800 uppercase mb-0.5">
-                                    HÓA ĐƠN
+                                    ${escapeHtml(docTitleHeader)}
                                 </h1>
                                 <p class="text-sm font-bold text-blue-700">Số: ${escapeHtml(state.invoiceId || '')}</p>
                             </div>

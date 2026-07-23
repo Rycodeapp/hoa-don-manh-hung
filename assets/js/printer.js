@@ -1,5 +1,5 @@
 /**
- * Module Printer Xử lý in Hóa đơn và Tự động đặt tên file khi lưu PDF trên cả Máy tính & Điện thoại
+ * Module Printer Xử lý in Hóa đơn / Báo giá và Tự động đặt tên file khi lưu PDF trên cả Máy tính & Điện thoại
  */
 
 const printer = (function () {
@@ -8,25 +8,27 @@ const printer = (function () {
         const state = stateManager.getState();
         
         const rawBuyerName = state.buyerName ? state.buyerName.trim() : 'KhachHang';
-        // Xóa ký tự không hợp lệ trong tên file
-        const cleanBuyerName = rawBuyerName.replace(/[/\\?%*:|"<>]/g, '');
+        const cleanBuyerName = typeof formatter !== 'undefined' && formatter.sanitizeFileName ? formatter.sanitizeFileName(rawBuyerName) : rawBuyerName.replace(/[/\\?%*:|"<>]/g, '');
+        
         const invoiceId = state.invoiceId ? state.invoiceId.trim() : 'HD';
 
+        let docTitleTag = state.invoiceTitle ? state.invoiceTitle.trim() : 'HÓA ĐƠN';
+        if (typeof formatter !== 'undefined' && formatter.sanitizeFileName) {
+            docTitleTag = formatter.sanitizeFileName(docTitleTag);
+        }
+
         // Đặt document.title chuẩn để điện thoại & máy tính đọc được tên file PDF khi Lưu
-        const pdfFileName = `${invoiceId} - ${cleanBuyerName} - Hoa Don Ban Hang`;
+        const pdfFileName = `${invoiceId} - ${cleanBuyerName} - ${docTitleTag}`;
         document.title = pdfFileName;
     }
 
     function printInvoice() {
-        // Cập nhật tên file PDF ngay lập tức
         updatePdfTitle();
 
-        // Đảm bảo preview đang mở
         if (typeof preview !== 'undefined') {
             preview.open();
         }
 
-        // Gọi lệnh in của hệ thống
         setTimeout(() => {
             window.print();
         }, 150);

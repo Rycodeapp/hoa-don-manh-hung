@@ -14,6 +14,7 @@ const stateManager = (function () {
     // Trạng thái mặc định
     let state = {
         unitName: 'Thế giới Cửa Mạnh Hùng',
+        invoiceTitle: 'HÓA ĐƠN', // Cho phép thay đổi thành BÁO GIÁ, BẢNG BÁO GIÁ...
         sellerPhone: '0976.088.080 - 0916.557.888',
         buyerName: '',
         buyerPhone: '',
@@ -29,9 +30,9 @@ const stateManager = (function () {
                 unit: 'm²',
                 width: 3.5,
                 height: 3.2,
-                quantity: 1, // Số bộ
+                quantity: 1,
                 areaPerSet: 11.2,
-                area: 11.2, // Tổng m²
+                area: 11.2,
                 price: 1350000,
                 total: 15120000,
                 note: 'Đã bao gồm chi phí lắp đặt'
@@ -68,7 +69,7 @@ const stateManager = (function () {
                 if (w > 0 && h > 0) {
                     const calcRes = typeof calculator !== 'undefined' ? calculator.calculateArea(w, h, setQty) : { areaPerSet: Math.round(w*h*100)/100, totalArea: Math.round(w*h*setQty*100)/100 };
                     item.areaPerSet = calcRes.areaPerSet;
-                    item.area = calcRes.totalArea; // Tổng m² = Ngang x Cao x Số bộ
+                    item.area = calcRes.totalArea;
                     item.total = Math.round(calcRes.totalArea * price);
                 } else {
                     item.areaPerSet = 0;
@@ -81,6 +82,7 @@ const stateManager = (function () {
 
     function updateCustomer(data, silent = false) {
         state.unitName = data.unitName !== undefined ? data.unitName : state.unitName;
+        state.invoiceTitle = data.invoiceTitle !== undefined ? data.invoiceTitle : state.invoiceTitle;
         state.sellerPhone = data.sellerPhone !== undefined ? data.sellerPhone : state.sellerPhone;
         state.buyerName = data.buyerName !== undefined ? data.buyerName : state.buyerName;
         state.buyerPhone = data.buyerPhone !== undefined ? data.buyerPhone : state.buyerPhone;
@@ -94,7 +96,6 @@ const stateManager = (function () {
             storage.saveInvoiceState(state);
         }
 
-        // Tự động cập nhật document.title theo mã HD và Tên khách hàng khi nhập liệu
         if (typeof printer !== 'undefined') {
             printer.updatePdfTitle();
         }
@@ -114,7 +115,7 @@ const stateManager = (function () {
             unit: 'm²',
             width: '',
             height: '',
-            quantity: 1, // Mặc định 1 bộ
+            quantity: 1,
             areaPerSet: 0,
             area: 0,
             price: 0,
