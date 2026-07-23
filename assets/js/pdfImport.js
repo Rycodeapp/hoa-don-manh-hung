@@ -1,16 +1,45 @@
 /**
- * Module PDF Import & Restore (SaaS 2025 Standard)
+ * Module PDF Import & Restore (SaaS 2025 Standard - Base64 Robust Engine)
  * Khôi phục & Chỉnh sửa Hóa đơn / Báo giá từ File PDF đã xuất
- * Không dùng OCR hay AI - Đọc dữ liệu JSON gốc được nhúng trực tiếp trong PDF.
+ * Sử dụng mã hóa Base64 thuần ASCII đảm bảo 100% trích xuất thành công trên mọi trình duyệt.
  */
 
 const pdfImport = (function () {
     const CURRENT_VERSION = '2.6';
-    const SIGNATURE_START = 'MANH_HUNG_INVOICE_V26_DATA_START:';
-    const SIGNATURE_END = ':MANH_HUNG_INVOICE_V26_DATA_END';
+    const B64_START = 'MANH_HUNG_INVOICE_V26_B64_START:';
+    const B64_END = ':MANH_HUNG_INVOICE_V26_B64_END';
+    
+    const RAW_START = 'MANH_HUNG_INVOICE_V26_DATA_START:';
+    const RAW_END = ':MANH_HUNG_INVOICE_V26_DATA_END';
 
     /**
-     * Tạo chuỗi JSON Payload hoàn chỉnh từ State ứng dụng hiện tại để nhúng vào PDF
+     * Mã hóa chuỗi UTF-8 sang Base64 an toàn
+     */
+    function utf8ToBase64(str) {
+        try {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
+        } catch (e) {
+            return btoa(str);
+        }
+    }
+
+    /**
+     * Giải mã chuỗi Base64 về UTF-8
+     */
+    function base64ToUtf8(str) {
+        try {
+            return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        } catch (e) {
+            return atob(str);
+        }
+    }
+
+    /**
+     * Tạo chuỗi nhúng Base64 vào PDF (100% Ký tự ASCII tiêu chuẩn)
      */
     function createEmbeddedPayload(state) {
         const totalAmount = typeof stateManager !== 'undefined' ? stateManager.getTotalAmount() : 0;
@@ -34,105 +63,118 @@ const pdfImport = (function () {
             exportedAt: new Date().toISOString()
         };
 
-        return SIGNATURE_START + JSON.stringify(payload) + SIGNATURE_END;
+        const jsonStr = JSON.stringify(payload);
+        const b64Str = utf8ToBase64(jsonStr);
+
+        return B64_START + b64Str + B64_END;
     }
 
     /**
-     * Trích xuất chuỗi JSON từ ArrayBuffer / Binary Text của file PDF
+     * Phân tích văn bản PDF bằng PDF.js
      */
-    function extractJsonFromBinary(buffer) {
-        try {
-            // Chuyển ArrayBuffer thành chuỗi text
-            const bytes = new Uint8Array(buffer);
-            let binaryStr = '';
-            
-            // Xử lý đọc theo chunk lớn để tránh stack overflow
-            const chunkSize = 8192;
-            for (let i = 0; i < bytes.length; i += chunkSize) {
-                const subArray = bytes.subarray(i, i + chunkSize);
-                binaryStr += String.fromCharCode.apply(null, subArray);
-            }
-
-            // Tìm vị trí chữ ký SIGNATURE_START và SIGNATURE_END
-            const startIdx = binaryStr.indexOf(SIGNATURE_START);
-            if (startIdx !== -1) {
-                const endIdx = binaryStr.indexOf(SIGNATURE_END, startIdx);
-                if (endIdx !== -1) {
-                    const jsonStr = binaryStr.substring(startIdx + SIGNATURE_START.length, endIdx);
-                    return JSON.parse(jsonStr);
-                }
-            }
-
-            // Nếu không tìm thấy bằng mã hóa mặc định, thử giải mã UTF-8
-            if (typeof TextDecoder !== 'undefined') {
-                const decoder = new TextDecoder('utf-8');
-                const decodedStr = decoder.decode(bytes);
-                const uStart = decodedStr.indexOf(SIGNATURE_START);
-                if (uStart !== -1) {
-                    const uEnd = decodedStr.indexOf(SIGNATURE_END, uStart);
-                    if (uEnd !== -1) {
-                        const jsonStr = decodedStr.substring(uStart + SIGNATURE_START.length, uEnd);
-                        return JSON.parse(jsonStr);
-                    }
-                }
-            }
-
-        } catch (err) {
-            console.error('Lỗi phân tích binary PDF:', err);
-        }
-        return null;
-    }
-
-    /**
-     * Trích xuất dữ liệu bằng PDF.js (nếu có thư viện PDF.js)
-     */
-    async function extractJsonUsingPdfJs(buffer) {
+    async function extractPayloadPdfJs(arrayBuffer) {
         if (typeof pdfjsLib === 'undefined') return null;
 
         try {
-            // Thiết lập worker PDF.js
             if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             }
 
-            const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-            let fullText = '';
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            let combinedText = '';
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(' ');
-                fullText += pageText + ' ';
+                const pageText = textContent.items.map(item => item.str).join('');
+                combinedText += pageText + ' ';
             }
 
-            const startIdx = fullText.indexOf(SIGNATURE_START);
-            if (startIdx !== -1) {
-                const endIdx = fullText.indexOf(SIGNATURE_END, startIdx);
-                if (endIdx !== -1) {
-                    const jsonStr = fullText.substring(startIdx + SIGNATURE_START.length, endIdx).trim();
+            // Xóa toàn bộ khoảng trắng dư thừa do PDF.js ghép chữ
+            const cleanText = combinedText.replace(/\s+/g, '');
+
+            // 1. Thử tìm Base64 Signature
+            const bStart = cleanText.indexOf(B64_START);
+            if (bStart !== -1) {
+                const bEnd = cleanText.indexOf(B64_END, bStart);
+                if (bEnd !== -1) {
+                    const b64Content = cleanText.substring(bStart + B64_START.length, bEnd);
+                    const jsonStr = base64ToUtf8(b64Content);
                     return JSON.parse(jsonStr);
                 }
             }
-        } catch (e) {
-            console.warn('PDF.js parse non-critical error:', e);
+
+            // 2. Thử tìm Raw Signature
+            const rStart = combinedText.indexOf(RAW_START);
+            if (rStart !== -1) {
+                const rEnd = combinedText.indexOf(RAW_END, rStart);
+                if (rEnd !== -1) {
+                    const jsonStr = combinedText.substring(rStart + RAW_START.length, rEnd);
+                    return JSON.parse(jsonStr);
+                }
+            }
+        } catch (err) {
+            console.warn('PDF.js extraction notice:', err);
         }
         return null;
     }
 
     /**
-     * Kiểm tra tính hợp lệ và hỗ trợ Migration dữ liệu theo version
+     * Phân tích Binary stream trực tiếp bằng ArrayBuffer
      */
-    function validateAndMigratePayload(payload) {
+    function extractPayloadBinary(arrayBuffer) {
+        try {
+            const bytes = new Uint8Array(arrayBuffer);
+            let binaryStr = '';
+            const chunkSize = 8192;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                binaryStr += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+            }
+
+            const cleanStr = binaryStr.replace(/\s+/g, '');
+
+            // 1. Thử B64
+            const bStart = cleanStr.indexOf(B64_START);
+            if (bStart !== -1) {
+                const bEnd = cleanStr.indexOf(B64_END, bStart);
+                if (bEnd !== -1) {
+                    const b64Content = cleanStr.substring(bStart + B64_START.length, bEnd);
+                    const jsonStr = base64ToUtf8(b64Content);
+                    return JSON.parse(jsonStr);
+                }
+            }
+
+            // 2. Thử UTF-8 Decode
+            if (typeof TextDecoder !== 'undefined') {
+                const decoder = new TextDecoder('utf-8');
+                const decodedText = decoder.decode(bytes);
+                const cleanDecoded = decodedText.replace(/\s+/g, '');
+                const uStart = cleanDecoded.indexOf(B64_START);
+                if (uStart !== -1) {
+                    const uEnd = cleanDecoded.indexOf(B64_END, uStart);
+                    if (uEnd !== -1) {
+                        const b64Content = cleanDecoded.substring(uStart + B64_START.length, uEnd);
+                        const jsonStr = base64ToUtf8(b64Content);
+                        return JSON.parse(jsonStr);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Binary extraction notice:', e);
+        }
+        return null;
+    }
+
+    /**
+     * Validate và chuyển đổi về State ứng dụng
+     */
+    function validatePayload(payload) {
         if (!payload || typeof payload !== 'object') {
             throw new Error('Dữ liệu không đúng định dạng');
         }
 
-        if (!payload.version) {
-            throw new Error('Thiếu thông tin phiên bản dữ liệu');
-        }
-
-        // Chuyển đổi payload thành State ứng dụng chuẩn
-        const newState = {
+        return {
             unitName: payload.unitName || 'Thế giới Cửa Mạnh Hùng',
             invoiceTitle: payload.invoiceTitle || 'HÓA ĐƠN',
             sellerPhone: payload.sellerPhone || '0976.088.080 - 0916.557.888',
@@ -145,12 +187,10 @@ const pdfImport = (function () {
             generalNote: payload.generalNote || '',
             items: Array.isArray(payload.items) ? payload.items : []
         };
-
-        return newState;
     }
 
     /**
-     * Hàm chọn file PDF từ máy tính / điện thoại và tiến hành Import
+     * Chọn file PDF và tiến hành Import
      */
     function selectAndImportPdf() {
         const input = document.createElement('input');
@@ -162,17 +202,14 @@ const pdfImport = (function () {
             if (!file) return;
 
             try {
-                // Hiển thị trạng thái đang đọc
-                console.log('Đang đọc file PDF:', file.name);
-
                 const arrayBuffer = await file.arrayBuffer();
-                
-                // Thuật toán 1: Thử phân tích bằng PDF.js trước
-                let payload = await extractJsonUsingPdfJs(arrayBuffer);
 
-                // Thuật toán 2: Nếu PDF.js không thấy, thử đọc binary stream trực tiếp
+                // 1. Phân tích bằng PDF.js
+                let payload = await extractPayloadPdfJs(arrayBuffer);
+
+                // 2. Phân tích bằng Binary Direct
                 if (!payload) {
-                    payload = extractJsonFromBinary(arrayBuffer);
+                    payload = extractPayloadBinary(arrayBuffer);
                 }
 
                 if (!payload) {
@@ -180,20 +217,14 @@ const pdfImport = (function () {
                     return;
                 }
 
-                // Validate và Migrate dữ liệu
-                const restoredState = validateAndMigratePayload(payload);
+                const restoredState = validatePayload(payload);
 
-                // Khôi phục vào StateManager
                 if (typeof stateManager !== 'undefined') {
-                    // Reset Undo Stack khi import thành công
                     if (typeof storage !== 'undefined') {
                         storage.clearUndoStack();
                     }
-
-                    // Cập nhật State mới & render lại giao diện
                     stateManager.setState(restoredState, false);
 
-                    // Thông báo thành công
                     const titleName = restoredState.invoiceTitle || 'Hóa đơn';
                     const code = restoredState.invoiceId || '';
                     const customerName = restoredState.buyerName ? ` - Khách: ${restoredState.buyerName}` : '';
@@ -202,7 +233,7 @@ const pdfImport = (function () {
 
             } catch (err) {
                 console.error('Lỗi khi khôi phục PDF:', err);
-                alert('Có lỗi xảy ra trong quá trình đọc file PDF:\n' + err.message);
+                alert('Đây không phải là file PDF được tạo từ ứng dụng hoặc dữ liệu đã bị mất.\n\nKhông thể khôi phục để chỉnh sửa.');
             }
         };
 

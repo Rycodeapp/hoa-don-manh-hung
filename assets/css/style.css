@@ -146,6 +146,20 @@ button:focus-visible {
     overflow: visible;
 }
 
+/* THẺ NHÚNG DỮ LIỆU GỐC ĐỂ KHÔI PHỤC PDF (ĐẢM BẢO KHÔNG BỊ STRIP KHỎI DOM IN) */
+.pdf-embedded-payload-tag {
+    display: block !important;
+    font-size: 1pt !important;
+    color: #ffffff !important;
+    background-color: #ffffff !important;
+    line-height: 1 !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    opacity: 0.01 !important;
+    user-select: none !important;
+    pointer-events: none !important;
+}
+
 /* QUY TẮC IN HÓA ĐƠN VÀ PHÂN TRANG THÔNG MINH @MEDIA PRINT */
 @media print {
     body > *:not(#previewModalContainer) {
@@ -185,7 +199,17 @@ button:focus-visible {
         width: 100% !important;
     }
 
-    /* Đảm bảo tên sản phẩm khi in hiển thị trọn vẹn 100% không bị cắt */
+    .pdf-embedded-payload-tag {
+        display: block !important;
+        font-size: 1pt !important;
+        color: #ffffff !important;
+        background-color: #ffffff !important;
+        line-height: 1 !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        opacity: 0.01 !important;
+    }
+
     .invoice-product-name {
         display: block !important;
         -webkit-line-clamp: unset !important;
