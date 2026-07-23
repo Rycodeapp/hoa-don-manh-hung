@@ -57,6 +57,30 @@ const customerForm = (function () {
                         </div>
                     </div>
 
+                    <!-- Mã Số Chứng Từ (Có nút sinh ngẫu nhiên 🔀 không bao giờ trùng) -->
+                    <div>
+                        <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
+                            Mã số chứng từ
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="inputInvoiceId" value="${escapeHtml(state.invoiceId || '')}" 
+                                placeholder="HD2307-001..." 
+                                class="form-input-custom font-bold text-slate-900 flex-1">
+                            <button type="button" id="btnRandomizeInvoiceId" title="Tạo mã ngẫu nhiên mới" class="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-bold rounded-xl border border-slate-200 transition-all flex items-center justify-center text-base">
+                                🔀
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ngày lập hóa đơn -->
+                    <div>
+                        <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
+                            Ngày lập chứng từ
+                        </label>
+                        <input type="date" id="inputCreatedDate" value="${state.createdDate || ''}" 
+                            class="form-input-custom">
+                    </div>
+
                     <!-- Tên Đơn vị bán hàng -->
                     <div class="md:col-span-2">
                         <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
@@ -108,21 +132,12 @@ const customerForm = (function () {
                     </div>
 
                     <!-- Địa chỉ giao hàng -->
-                    <div class="md:col-span-2">
+                    <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
                             Địa chỉ giao hàng / công trình
                         </label>
                         <input type="text" id="inputAddress" value="${escapeHtml(state.address || '')}" 
                             placeholder="Ví dụ: 123 Nguyễn Trãi, Q.5, TP.HCM..." 
-                            class="form-input-custom">
-                    </div>
-
-                    <!-- Ngày lập hóa đơn -->
-                    <div>
-                        <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
-                            Ngày lập chứng từ
-                        </label>
-                        <input type="date" id="inputCreatedDate" value="${state.createdDate || ''}" 
                             class="form-input-custom">
                     </div>
 
@@ -141,11 +156,12 @@ const customerForm = (function () {
     }
 
     function bindEvents(container) {
-        const fieldIds = ['inputInvoiceTitle', 'inputUnitName', 'inputSellerPhone', 'inputBuyerName', 'inputBuyerPhone', 'inputAddress', 'inputWarehouse', 'inputCreatedDate', 'inputGeneralNote'];
+        const fieldIds = ['inputInvoiceTitle', 'inputInvoiceId', 'inputUnitName', 'inputSellerPhone', 'inputBuyerName', 'inputBuyerPhone', 'inputAddress', 'inputWarehouse', 'inputCreatedDate', 'inputGeneralNote'];
 
         const handleInput = () => {
             stateManager.updateCustomer({
                 invoiceTitle: container.querySelector('#inputInvoiceTitle').value,
+                invoiceId: container.querySelector('#inputInvoiceId').value,
                 unitName: container.querySelector('#inputUnitName').value,
                 sellerPhone: container.querySelector('#inputSellerPhone').value,
                 buyerName: container.querySelector('#inputBuyerName').value,
@@ -164,6 +180,19 @@ const customerForm = (function () {
             }
         });
 
+        // Xử lý nút 🔀 Đổi mã ngẫu nhiên mới
+        const btnRandom = container.querySelector('#btnRandomizeInvoiceId');
+        if (btnRandom) {
+            btnRandom.addEventListener('click', () => {
+                const newCode = stateManager.generateRandomInvoiceId();
+                const idInput = container.querySelector('#inputInvoiceId');
+                if (idInput) {
+                    idInput.value = newCode;
+                }
+                stateManager.updateCustomer({ invoiceId: newCode });
+            });
+        }
+
         stateManager.subscribe(newState => {
             const activeEl = document.activeElement;
             fieldIds.forEach(id => {
@@ -171,6 +200,7 @@ const customerForm = (function () {
                 if (inputEl && inputEl !== activeEl) {
                     const keyMap = {
                         inputInvoiceTitle: 'invoiceTitle',
+                        inputInvoiceId: 'invoiceId',
                         inputUnitName: 'unitName',
                         inputSellerPhone: 'sellerPhone',
                         inputBuyerName: 'buyerName',

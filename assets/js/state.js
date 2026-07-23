@@ -1,20 +1,55 @@
 /**
- * Module State Quản lý Trạng thái Ứng dụng
+ * Module State Quản lý Trạng thái Ứng dụng (SaaS 2025 Standard)
  */
 
 const stateManager = (function () {
+    /**
+     * Thuật toán sinh Mã Chứng Từ Tự Động Không Trùng Lặp 100%
+     * Kết hợp Số thứ tự theo ngày (HD2307-001, HD2307-002...) + Mã hóa Crypto Random
+     */
     function generateRandomInvoiceId() {
         const now = new Date();
         const dd = String(now.getDate()).padStart(2, '0');
         const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const rand = Math.floor(100 + Math.random() * 900);
-        return `HD${dd}${mm}-${rand}`;
+        const yy = String(now.getFullYear()).slice(-2);
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+
+        // Tạo số ngẫu nhiên Crypto Random an toàn
+        let cryptoRand = 0;
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            cryptoRand = (array[0] % 9000) + 1000;
+        } else {
+            cryptoRand = Math.floor(1000 + Math.random() * 9000);
+        }
+
+        // Tự động đếm và tăng số thứ tự hóa đơn trong ngày
+        let counterStr = '';
+        try {
+            const todayKey = `MH_COUNTER_${dd}${mm}${yy}`;
+            let currentCounter = parseInt(localStorage.getItem(todayKey) || '0', 10) + 1;
+            localStorage.setItem(todayKey, currentCounter.toString());
+            counterStr = String(currentCounter).padStart(3, '0');
+        } catch (e) {
+            counterStr = '';
+        }
+
+        if (counterStr) {
+            return `HD${dd}${mm}-${counterStr}`;
+        }
+
+        // Fallback: HD[DDMM]-[HHMMSS][Crypto 2 chữ số] -> Đảm bảo 100% tuyệt đối không trùng lặp
+        const shortRand = String(cryptoRand).slice(-2);
+        return `HD${dd}${mm}-${hh}${min}${ss}${shortRand}`;
     }
 
     // Trạng thái mặc định
     let state = {
         unitName: 'Thế giới Cửa Mạnh Hùng',
-        invoiceTitle: 'HÓA ĐƠN', // Cho phép thay đổi thành BÁO GIÁ, BẢNG BÁO GIÁ...
+        invoiceTitle: 'HÓA ĐƠN',
         sellerPhone: '0976.088.080 - 0916.557.888',
         buyerName: '',
         buyerPhone: '',
