@@ -1,6 +1,6 @@
 /**
  * Component Preview & In Hóa đơn chuẩn 100% theo mẫu hóa đơn thực tế
- * Tích hợp Phân trang thông minh, hỗ trợ hiển thị Số bộ cửa và Tự động đặt tên file PDF trên Mobile & Desktop
+ * Tích hợp Phân trang thông minh, hiển thị đầy đủ 100% tên sản phẩm không bị cắt bớt
  */
 
 const preview = (function () {
@@ -88,7 +88,7 @@ const preview = (function () {
                     <tr class="invoice-paper-row">
                         <td class="text-center font-medium border-r border-b border-blue-600 ${cellPaddingClass}">${i + 1}</td>
                         <td class="border-r border-b border-blue-600 ${cellPaddingClass} font-semibold text-slate-900 leading-snug">
-                            <div class="invoice-product-name">${escapeHtml(item.productName || '')}</div>
+                            <div class="invoice-product-name whitespace-pre-wrap break-words">${escapeHtml(item.productName || '')}</div>
                             ${item.note ? `<div class="text-[11px] font-normal italic text-slate-600 mt-0.5">Ghi chú SP: ${escapeHtml(item.note)}</div>` : ''}
                         </td>
                         <td class="text-center border-r border-b border-blue-600 ${cellPaddingClass}">${escapeHtml(item.unit || '')}</td>
@@ -122,7 +122,7 @@ const preview = (function () {
                     <div class="bg-slate-800 text-white p-4 flex items-center justify-between print:hidden">
                         <div class="flex items-center gap-2 font-bold text-lg">
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Xem trước Hóa đơn (Chuẩn Font Times New Roman)
+                            Xem trước Hóa đơn (Hiển thị 100% Chữ)
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="printer.printInvoice()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-base flex items-center gap-2 transition-colors shadow-md">
@@ -189,17 +189,17 @@ const preview = (function () {
                             </div>
                         </div>
 
-                        <!-- BẢNG SẢN PHẨM -->
+                        <!-- BẢNG SẢN PHẨM HIỂN THỊ TRỌN VẸN 100% CHỮ -->
                         <div class="overflow-x-auto my-2">
                             <table class="w-full border-2 border-blue-600 border-collapse text-base">
                                 <thead>
                                     <tr class="bg-sky-100/90 font-bold text-center border-b-2 border-blue-600">
                                         <th class="border-r border-blue-600 p-2 w-[6%]">Số<br>Thứ<br>Tự</th>
-                                        <th class="border-r border-blue-600 p-2 w-[46%] text-center uppercase tracking-wide">TÊN QUY CÁCH SẢN PHẨM HÀNG HÓA</th>
-                                        <th class="border-r border-blue-600 p-2 w-[9%]">Đơn vị<br>tính</th>
-                                        <th class="border-r border-blue-600 p-2 w-[13%]">Số lượng /<br>Diện tích</th>
-                                        <th class="border-r border-blue-600 p-2 w-[12%]">Đơn giá</th>
-                                        <th class="border-r border-blue-600 p-2 w-[14%] uppercase">THÀNH TIỀN</th>
+                                        <th class="border-r border-blue-600 p-2 w-[48%] text-center uppercase tracking-wide">TÊN QUY CÁCH SẢN PHẨM HÀNG HÓA</th>
+                                        <th class="border-r border-blue-600 p-2 w-[8%]">Đơn vị<br>tính</th>
+                                        <th class="border-r border-blue-600 p-2 w-[14%]">Số lượng /<br>Diện tích</th>
+                                        <th class="border-r border-blue-600 p-2 w-[11%]">Đơn giá</th>
+                                        <th class="border-r border-blue-600 p-2 w-[13%] uppercase">THÀNH TIỀN</th>
                                     </tr>
                                 </thead>
                                 <tbody>
