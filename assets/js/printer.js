@@ -10,15 +10,21 @@ const printer = (function () {
         const rawBuyerName = state.buyerName ? state.buyerName.trim() : 'KhachHang';
         const cleanBuyerName = typeof formatter !== 'undefined' && formatter.sanitizeFileName ? formatter.sanitizeFileName(rawBuyerName) : rawBuyerName.replace(/[/\\?%*:|"<>]/g, '');
         
-        const invoiceId = state.invoiceId ? state.invoiceId.trim() : 'HD';
+        const rawInvoiceId = state.invoiceId ? state.invoiceId.trim() : '';
 
         let docTitleTag = state.invoiceTitle ? state.invoiceTitle.trim() : 'HÓA ĐƠN';
         if (typeof formatter !== 'undefined' && formatter.sanitizeFileName) {
             docTitleTag = formatter.sanitizeFileName(docTitleTag);
         }
 
-        // Đặt document.title chuẩn để điện thoại & máy tính đọc được tên file PDF khi Lưu
-        const pdfFileName = `${invoiceId} - ${cleanBuyerName} - ${docTitleTag}`;
+        // Khi lưu file PDF: Tự động thêm tiền tố "MH - " trước chuỗi số của mã chứng từ
+        let pdfCodeStr = 'MH';
+        if (rawInvoiceId) {
+            pdfCodeStr = rawInvoiceId.startsWith('MH - ') ? rawInvoiceId : `MH - ${rawInvoiceId}`;
+        }
+
+        // Đặt document.title chuẩn để điện thoại & máy tính tự điền tên file PDF khi Lưu: MH - [Chuỗi Số] - [Tên Khách Hàng] - [Tiêu Đề]
+        const pdfFileName = `${pdfCodeStr} - ${cleanBuyerName} - ${docTitleTag}`;
         document.title = pdfFileName;
     }
 

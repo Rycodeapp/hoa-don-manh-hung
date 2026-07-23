@@ -57,16 +57,16 @@ const customerForm = (function () {
                         </div>
                     </div>
 
-                    <!-- Mã Số Chứng Từ (Theo YYMMDD + Crypto Random) -->
+                    <!-- Mã Số Chứng Từ (Thuần chuỗi số YYMMDD + Counter) -->
                     <div>
                         <label class="block text-[14px] font-medium text-slate-700 mb-1.5">
-                            Mã số chứng từ
+                            Mã số chứng từ <span class="text-slate-400 font-normal text-xs">(Chuỗi số)</span>
                         </label>
                         <div class="flex gap-2">
                             <input type="text" id="inputInvoiceId" value="${escapeHtml(state.invoiceId || '')}" 
-                                placeholder="HD260723-001..." 
+                                placeholder="260723001..." 
                                 class="form-input-custom font-bold text-slate-900 flex-1">
-                            <button type="button" id="btnRandomizeInvoiceId" title="Tạo mã ngẫu nhiên mới theo ngày" class="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-bold rounded-xl border border-slate-200 transition-all flex items-center justify-center text-base">
+                            <button type="button" id="btnRandomizeInvoiceId" title="Tạo mã số mới theo ngày" class="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-bold rounded-xl border border-slate-200 transition-all flex items-center justify-center text-base">
                                 🔀
                             </button>
                         </div>
@@ -179,7 +179,6 @@ const customerForm = (function () {
             }
         });
 
-        // Xử lý riêng sự kiện người dùng tự thay đổi ngày lập chứng từ (isManualDate: true)
         const dateInput = container.querySelector('#inputCreatedDate');
         if (dateInput) {
             dateInput.addEventListener('change', () => {
@@ -191,7 +190,6 @@ const customerForm = (function () {
             });
         }
 
-        // Xử lý nút 🔀 Đổi mã ngẫu nhiên mới dựa theo Ngày đã chọn
         const btnRandom = container.querySelector('#btnRandomizeInvoiceId');
         if (btnRandom) {
             btnRandom.addEventListener('click', () => {

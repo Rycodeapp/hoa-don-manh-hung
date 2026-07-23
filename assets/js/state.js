@@ -15,8 +15,9 @@ const stateManager = (function () {
     }
 
     /**
-     * Thuật toán sinh Mã Chứng Từ Tự Động Theo Năm-Tháng-Ngày (YYMMDD)
-     * Format: HD[YYMMDD]-[001, 002...] (Tự tăng theo ngày)
+     * Thuật toán sinh Mã Chứng Từ Thuần Chuỗi Số Theo Năm-Tháng-Ngày (YYMMDD)
+     * Format: [YYMMDD][001, 002...] (Tự tăng theo ngày, 100% chuỗi số thuần túy)
+     * Ví dụ: 260723001, 260723002...
      */
     function generateRandomInvoiceId(customDateStr) {
         const dateVal = customDateStr ? new Date(customDateStr) : new Date();
@@ -43,10 +44,10 @@ const stateManager = (function () {
         }
 
         if (counterStr) {
-            return `HD${dateKey}-${counterStr}`;
+            return `${dateKey}${counterStr}`;
         }
 
-        // Fallback: HD[YYMMDD]-[HHMM][Crypto 2 chữ số]
+        // Fallback: [YYMMDD][HHMM][Crypto 2 chữ số] -> 100% chuỗi số thuần túy
         let cryptoRand = 0;
         if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
             const array = new Uint32Array(1);
@@ -56,7 +57,7 @@ const stateManager = (function () {
             cryptoRand = Math.floor(10 + Math.random() * 90);
         }
 
-        return `HD${dateKey}-${hh}${min}${cryptoRand}`;
+        return `${dateKey}${hh}${min}${cryptoRand}`;
     }
 
     // Trạng thái mặc định
@@ -71,7 +72,7 @@ const stateManager = (function () {
         warehouse: '',
         invoiceId: generateRandomInvoiceId(todayDate),
         createdDate: todayDate,
-        isManualDate: false, // Flag đánh dấu người dùng đã tự tay chỉnh ngày hay chưa
+        isManualDate: false,
         generalNote: 'Bảo hành 24 tháng đối với motor và 12 tháng đối với thân cửa.',
         items: [
             {
@@ -259,7 +260,6 @@ const stateManager = (function () {
             if (saved && Array.isArray(saved.items)) {
                 state = Object.assign({}, state, saved);
 
-                // Nếu người dùng KHÔNG tự tay sửa ngày trước đó, tự động cập nhật về ngày HÔM NAY
                 if (!saved.isManualDate) {
                     state.createdDate = getTodayDateString();
                     state.isManualDate = false;
