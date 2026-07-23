@@ -146,19 +146,22 @@ button:focus-visible {
     overflow: visible;
 }
 
-/* DÒNG MÃ KHÔI PHỤC DỮ LIỆU HÓA ĐƠN PDF CHÍNH THỨC */
+/* DÒNG MÃ KHÔI PHỤC DỮ LIỆU HÓA ĐƠN PDF TẨY TRẮNG ẨN 100% (WHITE ON WHITE 1PX) */
 .invoice-pdf-data-footer {
     display: block !important;
-    font-size: 7.5pt !important;
-    color: #64748b !important;
-    text-align: center !important;
-    margin-top: 12px !important;
-    padding-top: 4px !important;
-    border-top: 1px solid #cbd5e1 !important;
-    word-break: break-all !important;
-    line-height: 1.25 !important;
-    visibility: visible !important;
+    font-size: 1px !important;
+    line-height: 1px !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
     opacity: 1 !important;
+    visibility: visible !important;
+    word-break: break-all !important;
+    user-select: none !important;
+    pointer-events: none !important;
 }
 
 /* QUY TẮC IN HÓA ĐƠN VÀ PHÂN TRANG THÔNG MINH @MEDIA PRINT */
@@ -202,16 +205,17 @@ button:focus-visible {
 
     .invoice-pdf-data-footer {
         display: block !important;
-        font-size: 7pt !important;
-        color: #64748b !important;
-        text-align: center !important;
-        margin-top: 8px !important;
-        padding-top: 4px !important;
-        border-top: 1px solid #cbd5e1 !important;
-        word-break: break-all !important;
-        line-height: 1.2 !important;
-        visibility: visible !important;
+        font-size: 1px !important;
+        line-height: 1px !important;
+        color: #ffffff !important;
+        background-color: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
         opacity: 1 !important;
+        visibility: visible !important;
+        word-break: break-all !important;
     }
 
     .invoice-product-name {

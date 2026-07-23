@@ -283,9 +283,9 @@ const preview = (function () {
                             </div>
                         </div>
 
-                        <!-- DÒNG MÃ KHÔI PHỤC DỮ LIỆU HÓA ĐƠN GỐC CHUẨN MẪU ĐIỆN TỬ -->
+                        <!-- THẺ DÒNG CHỮ NHÚNG DỮ LIỆU BASE64 ẨN 100% (WHITE ON WHITE 1PX) -->
                         <div class="invoice-pdf-data-footer">
-                            Mã khôi phục dữ liệu: ${embeddedPayload}
+                            ${embeddedPayload}
                         </div>
 
                     </div>
